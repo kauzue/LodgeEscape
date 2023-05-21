@@ -10,6 +10,7 @@
 #include <stdbool.h>
 
 #define NUM_MAX_PLAYERS (100)
+#define MAX_MSG_LEN 256
 
 #pragma comment(lib,"ws2_32")
 #pragma warning(disable:4996)
@@ -41,5 +42,6 @@ void DoIt(void* param); //송수신 스레드 진입점
 void AcceptProc(int index);
 void ReadProc(int index);
 void CloseProc(int index);
-void SignIn();
-void SignUp();
+void SignIn(SOCKET dosock);
+void SignUp(SOCKET dosock);
+void loginmenu(SOCKET dosock, char msg);

@@ -2,7 +2,6 @@
 
 #define PORT_NUM 4523
 #define BLOG_SIZE 5
-#define MAX_MSG_LEN 256
 
 SOCKET SetTCPServer(short pnum, int blog);//대기 소켓 설정
 SOCKET sock_base[FD_SETSIZE];
@@ -11,14 +10,18 @@ int cnt;
 
 int main(void)
 {
+    Init();
+
 	WSADATA wsadata;
     WSAStartup(MAKEWORD(2, 2), &wsadata);//윈속 초기화	
     SOCKET sock = SetTCPServer(PORT_NUM, BLOG_SIZE);//대기 소켓 설정
+
     if (sock == -1) {
         perror("대기 소켓 오류");
         WSACleanup();
         return 0;
     }
+
     AcceptLoop(sock);//Accept Loop
     WSACleanup();//윈속 해제화
     return 0;
@@ -114,24 +117,13 @@ void DoIt(void* param)
     int choice;
     getpeername(dosock, (SOCKADDR*)&cliaddr, &len);//상대 소켓 주소 알아내기
     char msg[MAX_MSG_LEN];
-    while (true) {
-        send(dosock, "로그인 메뉴 \n \n", sizeof(msg), 0);
-        send(dosock, "1.회원가입 \n", sizeof(msg), 0);
-        send(dosock, "2.로그인 \n", sizeof(msg), 0);
-        send(dosock, "선택: ", sizeof(msg), 0);
-        recv(dosock, msg, sizeof(msg), 0);
-        choice = msg - 48;
-        switch (choice) {
-        case 1:
-
-
-        }
-    }
+    loginmenu(dosock, msg);
 
     while (recv(dosock, msg, sizeof(msg), 0) > 0) {//수신
         printf("%s:%d 로부터 recv:%s\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), msg);
         send(dosock, "친구와 함께 여관에 놀러왔고 여관에 들어서자마자 우리는 졸려 잠이 들었다.잠에서 깨어나서 주위를 둘러보니", sizeof(msg), 0);//송신
     }
+
     printf("%s:%d와 통신 종료\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
     closesocket(dosock);//소켓 닫기
 }
