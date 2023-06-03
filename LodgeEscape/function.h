@@ -18,6 +18,7 @@
 typedef struct player {
 	char ID[100];
 	char password[100];
+	int p_num;
 } player_t;
 
 typedef struct save {
@@ -42,6 +43,7 @@ void DoIt(void* param); //송수신 스레드 진입점
 void AcceptProc(int index);
 void ReadProc(int index);
 void CloseProc(int index);
-void SignIn(SOCKET dosock);
+int SignIn(SOCKET dosock, int b_login);
 void SignUp(SOCKET dosock);
-void loginmenu(SOCKET dosock, char msg);
+int loginmenu(SOCKET dosock, char* msg);
+void player1(SOCKET dosock, char* msg);

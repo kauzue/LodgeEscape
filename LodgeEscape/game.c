@@ -1,16 +1,17 @@
 #include "function.h"
 
-void loginmenu(SOCKET dosock, char msg)
+int loginmenu(SOCKET dosock, char* msg)
 {
-    while (true) {
-        int choice;
+    int choice = 1;
+    int b_login = 0;
 
-        send(dosock, "로그인 메뉴 \n \n", sizeof(msg), 0);
-        send(dosock, "1.회원가입 \n", sizeof(msg), 0);
-        send(dosock, "2.로그인 \n", sizeof(msg), 0);
-        send(dosock, "선택: ", sizeof(msg), 0);
-        recv(dosock, msg, sizeof(msg), 0);
-        choice = msg - 48;
+
+    while (true) {
+        send(dosock, "로그인 메뉴 \n \n", 16, 0);
+        send(dosock, "1.회원가입 \n", 13, 0);
+        send(dosock, "2.로그인 \n", 11, 0);
+        send(dosock, "선택: ", 7, 0);
+        while (recv(dosock, &msg, strlen(msg), 0) != 0);
 
         system("cls");
 
@@ -18,14 +19,20 @@ void loginmenu(SOCKET dosock, char msg)
         case 1:
             SignUp(dosock);
             break;
-
         case 2:
-            SignIn(dosock);
-            break;
+            b_login = SignIn(dosock, b_login);
+            choice = 0;
+            return -1;
 
         default:
-            send(dosock, "다시 입력해주세요.", sizeof(msg), 0);
+            send(dosock, "다시 입력해주세요.", 19, 0);
             system("cls");
         }
     }
+    return b_login;
+}
+
+void player1(SOCKET dosock, char* msg)
+{
+
 }

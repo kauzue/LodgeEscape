@@ -37,19 +37,18 @@ void Init()
 	s_num_players = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
 }
 
-void SignIn(SOCKET dosock)
+int SignIn(SOCKET dosock, int b_login)
 {
 	char ID[100];
 	char Password[100];
-	int b_login = 0;
 
 	do {
-		send(dosock, "로그인 \n \n", sizeof(MAX_MSG_LEN), 0);
-		send(dosock, "아이디: ", sizeof(MAX_MSG_LEN), 0);
-		recv(dosock, ID, sizeof(ID), 0);
+		send(dosock, "로그인 \n", 9, 0);
+		send(dosock, "아이디: ", 9, 0);
+		recv(dosock, ID, strlen(ID), 0);
 
-		send(dosock, "비밀번호: \n", sizeof(MAX_MSG_LEN), 0);
-		recv(dosock, Password, sizeof(Password), 0);
+		send(dosock, "비밀번호:", 10, 0);
+		recv(dosock, Password, strlen(Password), 0);
 		system("cls");
 			
 		for (r_num = 0; r_num < s_num_players; ++r_num) {
@@ -60,12 +59,14 @@ void SignIn(SOCKET dosock)
 		}
 
 		if (!b_login) {
-			send(dosock, "아이디 혹은 비밀번호가 일치하지 않습니다. \n", sizeof(MAX_MSG_LEN), 0);
-			send(dosock, "다시 입력해주세요. \n", sizeof(MAX_MSG_LEN), 0);
+			send(dosock, "아이디 혹은 비밀번호가 일치하지 않습니다.", 42, 0);
+			send(dosock, "다시 입력해주세요.", 19, 0);
 			Sleep(1250);
 			system("cls");
 		}
 	} while (!b_login);
+	
+	return r_num;
 }
 
 void SignUp(SOCKET dosock)
@@ -83,16 +84,16 @@ void SignUp(SOCKET dosock)
 	player_t player;
 
 	do {
-		send(dosock, "회원가입 \n \n", sizeof(MAX_MSG_LEN), 0);
-		send(dosock, "아이디: \n", sizeof(MAX_MSG_LEN), 0);
-		recv(dosock, player.ID, sizeof(player.ID), 0);
+		send(dosock, "회원가입 \n", 11, 0);
+		send(dosock, "아이디: ", 9, 0);
+		recv(dosock, player.ID, strlen(player.ID), 0);
 		system("cls");
 
 		same = 0;
 		for (int i = 0; i < s_num_players; ++i) {
 			if (strcmp(player.ID, s_players[i].ID) == 0) {
-				send(dosock, "중복되는 아이디입니다. \n", sizeof(MAX_MSG_LEN), 0);
-				send(dosock, "다시 입력해주세요. \n", sizeof(MAX_MSG_LEN), 0);
+				send(dosock, "중복되는 아이디입니다.", 23, 0);
+				send(dosock, "다시 입력해주세요.", 19, 0);
 				Sleep(1250);
 				system("cls");
 				same = 1;
@@ -101,9 +102,23 @@ void SignUp(SOCKET dosock)
 		}
 	} while (same);
 
-	send(dosock, "비밀번호: \n", sizeof(MAX_MSG_LEN), 0);
-	recv(dosock, player.password, sizeof(player.password), 0);
+	send(dosock, "비밀번호: ", 11, 0);
+	recv(dosock, player.password, strlen(player.password), 0);
 	system("cls");
+	do {
+		send(dosock, "플레이어 번호: ", 16, 0);
+		recv(dosock, player.p_num, sizeof(player.p_num), 0);
+		system("cls");
+
+		same = 0;
+		if (player.p_num != 1 || player.p_num != 2) {
+			send(dosock, "1 혹은 2가 아닌 다른 값을 입력하셨습니다.", 42, 0);
+			send(dosock, "다시 입력해주세요.", 19, 0);
+			getchar();
+			system("cls");
+			same = 1;
+		}
+	} while (same);
 
 	memcpy(&s_players[s_num_players], &player, sizeof(player_t));
 	++s_num_players;
