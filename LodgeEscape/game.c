@@ -1,19 +1,19 @@
 #include "function.h"
 
-int loginmenu(SOCKET dosock, char* msg)
+int loginmenu(SOCKET dosock)
 {
     int choice = 1;
     int b_login = 0;
-
+    char* msg[MAX_MSG_LEN];
 
     while (true) {
-        send(dosock, "ë¡œê·¸ì¸ ë©”ë‰´ \n \n", 16, 0);
-        send(dosock, "1.íšŒì›ê°€ì… \n", 13, 0);
-        send(dosock, "2.ë¡œê·¸ì¸ \n", 11, 0);
-        send(dosock, "ì„ íƒ: ", 7, 0);
-        while (recv(dosock, msg, sizeof(msg), 0) != 0);
+        send(dosock, "·Î±×ÀÎ ¸Ş´º \n", 14, 0);
+        send(dosock, "1.È¸¿ø°¡ÀÔ \n", 13, 0);
+        send(dosock, "2.·Î±×ÀÎ \n", 11, 0);
+        send(dosock, "¼±ÅÃ: ", 7, 0);
+        recv(dosock, msg, sizeof(msg), 0);
 
-        system("cls");
+        send(dosock, "cls", 4, 0);
 
         switch (choice) {
         case 1:
@@ -25,7 +25,7 @@ int loginmenu(SOCKET dosock, char* msg)
             return -1;
 
         default:
-            send(dosock, "ë‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”.", 19, 0);
+            send(dosock, "´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.", 19, 0);
             system("cls");
         }
     }
