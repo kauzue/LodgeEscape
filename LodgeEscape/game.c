@@ -8,11 +8,11 @@ int loginmenu(SOCKET dosock)
 
     while (true) {
         send(dosock, "로그인 메뉴 \n", 14, 0);
-        sleep(10);
+        Sleep(10);
         send(dosock, "1.회원가입 \n", 13, 0);
-        sleep(10);
+        Sleep(10);
         send(dosock, "2.로그인 \n", 11, 0);
-        sleep(10);
+        Sleep(10);
         send(dosock, "선택: ", 7, 0);
         recv(dosock, msg, sizeof(msg), 0);
 
@@ -29,7 +29,8 @@ int loginmenu(SOCKET dosock)
 
         default:
             send(dosock, "다시 입력해주세요.", 19, 0);
-            system("cls");
+            Sleep(10);
+            send(dosock, "cls", 4, 0);
         }
     }
     return b_login;
