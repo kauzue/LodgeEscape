@@ -1,6 +1,6 @@
 #include "function.h"
 
-#define PORT_NUM 4523
+#define PORT_NUM 1252
 #define BLOG_SIZE 5
 
 SOCKET SetTCPServer(short pnum, int blog);//대기 소켓 설정
