@@ -119,8 +119,7 @@ void DoIt(void* param)
     getpeername(dosock, (SOCKADDR*)&cliaddr, &len);//상대 소켓 주소 알아내기
     char msg[MAX_MSG_LEN];
     int r_num = loginmenu(dosock, msg);
-    strcpy(msg, "친구와 함께 여관에 놀러왔고 여관에 들어서자마자 우리는 졸려 잠이 들었다.잠에서 깨어나서 주위를 둘러보니");
-    send(dosock, msg, strlen(msg), 0);//송신
+    send(dosock, "친구와 함께 여관에 놀러왔고 여관에 들어서자마자 우리는 졸려 잠이 들었다.잠에서 깨어나서 주위를 둘러보니", 104, 0);//송신
 
     while (recv(dosock, msg, strlen(msg), 0) > 0) {//수신
         printf("%s:%d 로부터 recv:%s\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), msg);

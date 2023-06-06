@@ -44,7 +44,7 @@ int SignIn(SOCKET dosock, int b_login)
 
 	do {
 		send(dosock, "로그인 \n", 9, 0);
-		Sleep(10);
+		Sleep(1);
 		send(dosock, "아이디: ", 9, 0);
 		recv(dosock, ID, strlen(ID), 0);
 
@@ -61,7 +61,7 @@ int SignIn(SOCKET dosock, int b_login)
 
 		if (!b_login) {
 			send(dosock, "아이디 혹은 비밀번호가 일치하지 않습니다. \n", 42, 0);
-			Sleep(10);
+			Sleep(1);
 			send(dosock, "다시 입력해주세요.", 19, 0);
 			Sleep(1250);
 			send(dosock, "cls", 4, 0);
@@ -87,7 +87,7 @@ void SignUp(SOCKET dosock)
 
 	do {
 		send(dosock, "회원가입 \n", 11, 0);
-		Sleep(10);
+		Sleep(1);
 		send(dosock, "아이디: ", 9, 0);
 		recv(dosock, player.ID, strlen(player.ID), 0);
 		send(dosock, "cls", 4, 0);
@@ -96,7 +96,7 @@ void SignUp(SOCKET dosock)
 		for (int i = 0; i < s_num_players; ++i) {
 			if (strcmp(player.ID, s_players[i].ID) == 0) {
 				send(dosock, "중복되는 아이디입니다. \n", 23, 0);
-				Sleep(10);
+				Sleep(1);
 				send(dosock, "다시 입력해주세요.", 19, 0);
 				Sleep(1250);
 				send(dosock, "cls", 4, 0);
@@ -118,7 +118,7 @@ void SignUp(SOCKET dosock)
 		same = 0;
 		if (player.p_num != 1 && player.p_num != 2) {
 			send(dosock, "1 혹은 2가 아닌 다른 값을 입력하셨습니다.", 42, 0);
-			Sleep(10);
+			Sleep(1);
 			send(dosock, "다시 입력해주세요.", 19, 0);
 			Sleep(1250);
 			send(dosock, "cls", 4, 0);
