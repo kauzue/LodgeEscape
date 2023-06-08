@@ -7,14 +7,16 @@ int loginmenu(SOCKET dosock)
     char* msg[MAX_MSG_LEN];
 
     while (true) {
+        send(dosock, "init", 5, 0);
+        Sleep(50);
         send(dosock, "로그인 메뉴 \n", 14, 0);
-        Sleep(1);
+        Sleep(10);
         send(dosock, "1.회원가입 \n", 13, 0);
-        Sleep(1);
+        Sleep(10);
         send(dosock, "2.로그인 \n", 11, 0);
-        Sleep(1);
+        Sleep(10);
         send(dosock, "선택: ", 7, 0);
-        recv(dosock, msg, sizeof(msg), 0);
+        recv(dosock, msg, strlen(msg), 0);
 
         send(dosock, "cls", 4, 0);
 

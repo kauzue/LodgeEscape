@@ -16,8 +16,8 @@
 #pragma warning(disable:4996)
 
 typedef struct player {
-	char ID[100];
-	char password[100];
+	char ID[MAX_MSG_LEN];
+	char password[MAX_MSG_LEN];
 	int p_num;
 } player_t;
 

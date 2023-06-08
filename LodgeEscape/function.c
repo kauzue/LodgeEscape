@@ -39,29 +39,29 @@ void Init()
 
 int SignIn(SOCKET dosock, int b_login)
 {
-	char ID[100];
-	char Password[100];
+	char ID[MAX_MSG_LEN];
+	char password[MAX_MSG_LEN];
 
 	do {
 		send(dosock, "로그인 \n", 9, 0);
-		Sleep(1);
+		Sleep(10);
 		send(dosock, "아이디: ", 9, 0);
 		recv(dosock, ID, strlen(ID), 0);
 
-		send(dosock, "비밀번호:", 10, 0);
-		recv(dosock, Password, strlen(Password), 0);
+		send(dosock, "비밀번호: ", 10, 0);
+		recv(dosock, password, strlen(password), 0);
 		send(dosock, "cls", 4, 0);
 
 		for (r_num = 0; r_num < s_num_players; ++r_num) {
-			if (strcmp(ID, s_players[r_num].ID) == 0 && strcmp(Password, s_players[r_num].password) == 0) {
+			if (strcmp(ID, s_players[r_num].ID) == 0 && strcmp(password, s_players[r_num].password) == 0) {
 				b_login = 1;
 				break;
 			}
 		}
 
 		if (!b_login) {
-			send(dosock, "아이디 혹은 비밀번호가 일치하지 않습니다. \n", 42, 0);
-			Sleep(1);
+			send(dosock, "아이디 혹은 비밀번호가 일치하지 않습니다. \n", 44, 0);
+			Sleep(100);
 			send(dosock, "다시 입력해주세요.", 19, 0);
 			Sleep(1250);
 			send(dosock, "cls", 4, 0);
@@ -82,21 +82,23 @@ void SignUp(SOCKET dosock)
 
 	int choice = 0;
 	int same;
+	char msg[MAX_MSG_LEN];
 
 	player_t player;
 
 	do {
 		send(dosock, "회원가입 \n", 11, 0);
-		Sleep(1);
+		Sleep(10);
 		send(dosock, "아이디: ", 9, 0);
-		recv(dosock, player.ID, strlen(player.ID), 0);
-		send(dosock, "cls", 4, 0);
+		recv(dosock, player.ID, MAX_MSG_LEN, 0);
 
 		same = 0;
 		for (int i = 0; i < s_num_players; ++i) {
 			if (strcmp(player.ID, s_players[i].ID) == 0) {
+				send(dosock, "cls", 4, 0);
+				Sleep(10);
 				send(dosock, "중복되는 아이디입니다. \n", 23, 0);
-				Sleep(1);
+				Sleep(10);
 				send(dosock, "다시 입력해주세요.", 19, 0);
 				Sleep(1250);
 				send(dosock, "cls", 4, 0);
@@ -108,17 +110,18 @@ void SignUp(SOCKET dosock)
 
 	send(dosock, "비밀번호: ", 11, 0);
 	recv(dosock, player.password, strlen(player.password), 0);
-	send(dosock, "cls", 4, 0);
 
 	do {
 		send(dosock, "플레이어 번호: ", 16, 0);
-		recv(dosock, player.p_num, sizeof(player.p_num), 0);
-		send(dosock, "cls", 4, 0);
+		recv(dosock, msg, strlen(msg), 0);
+		player.p_num = atoi(msg);
 
 		same = 0;
 		if (player.p_num != 1 && player.p_num != 2) {
+			send(dosock, "cls", 4, 0);
+			Sleep(10);
 			send(dosock, "1 혹은 2가 아닌 다른 값을 입력하셨습니다.", 42, 0);
-			Sleep(1);
+			Sleep(10);
 			send(dosock, "다시 입력해주세요.", 19, 0);
 			Sleep(1250);
 			send(dosock, "cls", 4, 0);
