@@ -15,6 +15,7 @@
 #pragma comment(lib,"ws2_32")
 #pragma warning(disable:4996)
 
+
 typedef struct player {
 	char ID[MAX_MSG_LEN];
 	char password[MAX_MSG_LEN];
@@ -43,7 +44,7 @@ void DoIt(void* param); //송수신 스레드 진입점
 void AcceptProc(int index);
 void ReadProc(int index);
 void CloseProc(int index);
-int SignIn(SOCKET dosock, int b_login);
+void SignIn(SOCKET dosock);
 void SignUp(SOCKET dosock);
-int loginmenu(SOCKET dosock, char* msg);
-void player1(SOCKET dosock, char* msg);
+int loginmenu(SOCKET dosock);
+void player1(SOCKET dosock);

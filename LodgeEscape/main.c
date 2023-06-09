@@ -113,22 +113,21 @@ void DoIt(void* param)
 {
     SOCKET dosock = (SOCKET)param;
     SOCKADDR_IN cliaddr = { 0 };
-    player_t player[NUM_MAX_PLAYERS];
+
     int len = sizeof(cliaddr);
     int choice;
+
+    player_t s_players[NUM_MAX_PLAYERS];
+
     getpeername(dosock, (SOCKADDR*)&cliaddr, &len);//상대 소켓 주소 알아내기
-    char msg[MAX_MSG_LEN];
-    int r_num = loginmenu(dosock, msg);
-    send(dosock, "친구와 함께 여관에 놀러왔고 여관에 들어서자마자 우리는 졸려 잠이 들었다.잠에서 깨어나서 주위를 둘러보니", 104, 0);//송신
+    char msg[MAX_MSG_LEN] = "";
+    loginmenu(dosock);
 
     while (recv(dosock, msg, strlen(msg), 0) > 0) {//수신
         printf("%s:%d 로부터 recv:%s\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), msg);
-        if (player[r_num].p_num == 1) {
-            player1(dosock, msg[MAX_MSG_LEN]);
-        }
     }
 
-    printf("%s:%d와 통신 종료\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+    printf("와 통신 종료\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
     closesocket(dosock);//소켓 닫기
 }
 
