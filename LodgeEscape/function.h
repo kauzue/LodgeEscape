@@ -44,7 +44,8 @@ void DoIt(void* param); //송수신 스레드 진입점
 void AcceptProc(int index);
 void ReadProc(int index);
 void CloseProc(int index);
+int loginmenu(SOCKET dosock);
+void OpenMainMenu(SOCKET dosock);
+void player1(SOCKET dosock);
 void SignIn(SOCKET dosock);
 void SignUp(SOCKET dosock);
-int loginmenu(SOCKET dosock);
-void player1(SOCKET dosock);
