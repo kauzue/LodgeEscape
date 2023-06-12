@@ -116,6 +116,7 @@ void DoIt(void* param)
 
     int len = sizeof(cliaddr);
     int choice;
+    char ID[MAX_MSG_LEN] = "";
 
     player_t s_players[NUM_MAX_PLAYERS];
 
@@ -127,7 +128,7 @@ void DoIt(void* param)
         printf("%s:%d 로부터 recv:%s\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), msg);
     }
 
-    printf("와 통신 종료\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+    printf("%s와 통신 종료\n", ID);
     closesocket(dosock);//소켓 닫기
 }
 

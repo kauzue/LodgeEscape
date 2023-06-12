@@ -10,7 +10,6 @@ int loginmenu(SOCKET dosock)
 {
     int choice = 1;
 
-
     while (choice) {
         send(dosock, "init", 5, 0);
         Sleep(50);
@@ -60,15 +59,9 @@ int loginmenu(SOCKET dosock)
 
 void OpenMainMenu(SOCKET dosock)
 {
-	strcpy(msg, "drawmain");
+	strcpy(msg, "menu");
 	send(dosock, msg, MAX_MSG_LEN, 0);
 
-}
-
-void MoveCursor(SOCKET dosock)
-{
-	strcpy(msg, "control key");
-	send(dosock, msg, MAX_MSG_LEN, 0);
 }
 
 void player1(SOCKET dosock)
@@ -96,9 +89,9 @@ void SignIn(SOCKET dosock)
 
 	while (b_login) {
 		send(dosock, "로그인 \n", 9, 0);
-		Sleep(1000);
+		Sleep(100);
 
-		send(dosock, "아이디", 7, 0);
+		send(dosock, "아이디 ", 9, 0);
 		Sleep(50);
 
 		strcpy(msg, "선택: ");
@@ -113,7 +106,7 @@ void SignIn(SOCKET dosock)
 		strcpy(ID, msg);
 		printf("%s", ID);
 
-		strcpy(msg, "비밀번호");
+		strcpy(msg, "비밀번호 ");
 		send(dosock, msg, MAX_MSG_LEN, 0);
 		Sleep(50);
 
@@ -152,7 +145,7 @@ void SignUp(SOCKET dosock)
 	}
 
 	int choice = 0;
-	int same;
+	int same = 0;
 	char msg[MAX_MSG_LEN] = "";
 
 	player_t player;
@@ -160,15 +153,18 @@ void SignUp(SOCKET dosock)
 	do {
 		send(dosock, "회원가입 \n", 11, 0);
 		Sleep(100);
-		send(dosock, "아이디", 7, 0);
+		strcpy(msg, "아이디 ");
+		send(dosock, msg, MAX_MSG_LEN, 0);
 		Sleep(50);
 		strcpy(msg, "선택: ");
 		send(dosock, msg, MAX_MSG_LEN, 0);
+		if (same == 0) {
+			recv(dosock, msg, MAX_MSG_LEN, 0);
+		}
 		recv(dosock, msg, MAX_MSG_LEN, 0);
 
 		printf("%s", msg);
 
-		same = 0;
 		for (int i = 0; i < s_num_players; ++i) {
 			if (strcmp(msg, s_players[i].ID) == 0) {
 				send(dosock, "cls", 4, 0);
@@ -178,15 +174,19 @@ void SignUp(SOCKET dosock)
 				send(dosock, "다시 입력해주세요.", 19, 0);
 				Sleep(1250);
 				send(dosock, "cls", 4, 0);
-				same = 1;
+				same++;
 				break;
+			}
+
+			else {
+				same = 0;
 			}
 		}
 	} while (same);
 
 	strcpy(player.ID, msg);
 
-	send(dosock, "비밀번호", 9, 0);
+	send(dosock, "비밀번호 ", 9, 0);
 	Sleep(50);
 
 	strcpy(msg, "선택: ");
@@ -196,7 +196,7 @@ void SignUp(SOCKET dosock)
 	strcpy(player.password, msg);
 
 	do {
-		send(dosock, "플레이어 번호", 14, 0);
+		send(dosock, "플레이어 번호 ", 14, 0);
 		Sleep(50);
 
 		strcpy(msg, "선택: ");
