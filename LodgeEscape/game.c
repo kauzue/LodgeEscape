@@ -8,7 +8,7 @@ int r_num;
 
 int loginmenu(SOCKET dosock)
 {
-    int choice = 1;
+    int choice = 3;
 
     while (choice) {
         send(dosock, "init", 5, 0);
@@ -28,12 +28,11 @@ int loginmenu(SOCKET dosock)
 
 		strcpy(msg, "선택: ");
         send(dosock, msg, MAX_MSG_LEN, 0);
-
-        recv(dosock, msg, strlen(msg), 0);
+		recv(dosock, msg, MAX_MSG_LEN, 0);
 
         send(dosock, "cls", 4, 0);
 
-        choice = atoi(msg);
+		choice = atoi(msg);
 
         switch (choice) {
         case 1:
@@ -51,7 +50,7 @@ int loginmenu(SOCKET dosock)
 
             send(dosock, "cls", 4, 0);
 
-			choice = 1;
+			choice = 3;
         }
     }
 	OpenMainMenu(dosock);
@@ -61,12 +60,48 @@ void OpenMainMenu(SOCKET dosock)
 {
 	strcpy(msg, "menu");
 	send(dosock, msg, MAX_MSG_LEN, 0);
+	recv(dosock, msg, MAX_MSG_LEN, 0);
 
+	if (strcmp(msg, "start game") == 0) {
+		if (r_num == 1) {
+			player1(dosock);
+		}
+	}
+
+	else if (strcmp(msg, "continue") == 0) {
+		send(dosock, "success", 8, 0);
+	}
+
+	else if (strcmp(msg, "login data") == 0) {
+		strcpy(msg, "아이디 : %s", s_players[r_num].ID);
+		send(dosock, msg, MAX_MSG_LEN, 0);
+
+		strcpy(msg, "비밀번호 : %s", s_players[r_num].password);
+		send(dosock, msg, MAX_MSG_LEN, 0);
+
+		strcpy(msg, "플레이어 번호 : %d", s_players[r_num].p_num);
+		send(dosock, msg, MAX_MSG_LEN, 0);
+	}
+
+	else if (strcmp(msg, "logout") == 0) {
+
+	}
+
+	else if (strcmp(msg, "chapter") == 0) {
+		send(dosock, "success", 8, 0);
+
+	}
+
+	else if (strcmp(msg, "ending") == 0) {
+		send(dosock, "success", 8, 0);
+
+	}
 }
 
 void player1(SOCKET dosock)
 {
-    send(dosock, "성공", 5, 0);
+	strcpy(msg, "player1");
+	send(dosock, msg, MAX_MSG_LEN, 0);
 }
 
 void Init()
@@ -91,14 +126,11 @@ void SignIn(SOCKET dosock)
 		send(dosock, "로그인 \n", 9, 0);
 		Sleep(100);
 
-		send(dosock, "아이디 ", 9, 0);
+		send(dosock, "아이디 ", 11, 0);
 		Sleep(50);
 
 		strcpy(msg, "선택: ");
 		send(dosock, msg, MAX_MSG_LEN, 0);
-		if (b_login == 1) {
-			recv(dosock, msg, MAX_MSG_LEN, 0);
-		}
 		recv(dosock, msg, MAX_MSG_LEN, 0);
 
 		int err = WSAGetLastError();
@@ -158,9 +190,6 @@ void SignUp(SOCKET dosock)
 		Sleep(50);
 		strcpy(msg, "선택: ");
 		send(dosock, msg, MAX_MSG_LEN, 0);
-		if (same == 0) {
-			recv(dosock, msg, MAX_MSG_LEN, 0);
-		}
 		recv(dosock, msg, MAX_MSG_LEN, 0);
 
 		printf("%s", msg);
