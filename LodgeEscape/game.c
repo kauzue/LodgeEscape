@@ -73,18 +73,36 @@ void OpenMainMenu(SOCKET dosock)
 	}
 
 	else if (strcmp(msg, "login data") == 0) {
-		strcpy(msg, "아이디 : %s", s_players[r_num].ID);
+		char ch = s_players[r_num].p_num + '0';
+
+		strcpy(msg, "아이디 : ");
+		strcat(msg, s_players[r_num].ID);
+		strcat(msg, "\n");
 		send(dosock, msg, MAX_MSG_LEN, 0);
 
-		strcpy(msg, "비밀번호 : %s", s_players[r_num].password);
+		strcpy(msg, "비밀번호 : ");
+		strcat(msg, s_players[r_num].password);
+		strcat(msg, "\n");
 		send(dosock, msg, MAX_MSG_LEN, 0);
 
-		strcpy(msg, "플레이어 번호 : %d", s_players[r_num].p_num);
+		if (s_players[r_num].p_num == 1) {
+			strcpy(msg, "플레이어 번호 : 1 \n");
+		}
+
+		else {
+			strcpy(msg, "플레이어 번호 : 2 \n");
+		}
+		send(dosock, msg, MAX_MSG_LEN, 0);
+
+		strcpy(msg, "pause");
+		send(dosock, msg, MAX_MSG_LEN, 0);
+		
+		strcpy(msg, "menu");
 		send(dosock, msg, MAX_MSG_LEN, 0);
 	}
 
 	else if (strcmp(msg, "logout") == 0) {
-
+		loginmenu(dosock);
 	}
 
 	else if (strcmp(msg, "chapter") == 0) {

@@ -1,7 +1,0 @@
-﻿  game.c
-C:\Users\BIT\Desktop\lodgeescape\LodgeEscape\game.c(76,49): warning C4020: 'strcpy': 실제 매개 변수가 너무 많습니다.
-C:\Users\BIT\Desktop\lodgeescape\LodgeEscape\game.c(79,52): warning C4020: 'strcpy': 실제 매개 변수가 너무 많습니다.
-C:\Users\BIT\Desktop\lodgeescape\LodgeEscape\game.c(82,59): warning C4020: 'strcpy': 실제 매개 변수가 너무 많습니다.
-C:\Users\BIT\Desktop\lodgeescape\LodgeEscape\game.c(116,18): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\BIT\Desktop\lodgeescape\LodgeEscape\game.c(57): warning C4716: 'loginmenu': 값을 반환해야 합니다.
-  LodgeEscape.vcxproj -> C:\Users\BIT\Desktop\lodgeescape\x64\Debug\LodgeEscape.exe
