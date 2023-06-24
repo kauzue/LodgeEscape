@@ -10,11 +10,11 @@
 #include <stdbool.h>
 
 #define NUM_MAX_PLAYERS (100)
+#define NUM_MAX_SAVES_PER_PLAYER (20)
 #define MAX_MSG_LEN 256
 
 #pragma comment(lib,"ws2_32")
 #pragma warning(disable:4996)
-
 
 typedef struct player {
 	char ID[MAX_MSG_LEN];
@@ -23,7 +23,8 @@ typedef struct player {
 } player_t;
 
 typedef struct save {
-	int checkpoint;
+	int stage;
+	int chapter;
 } save_t;
 
 typedef struct ending {

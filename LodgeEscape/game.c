@@ -1,10 +1,12 @@
 #include "function.h"
 
 player_t s_players[NUM_MAX_PLAYERS];
+save_t s_saves[NUM_MAX_PLAYERS][NUM_MAX_SAVES_PER_PLAYER];
 
 char msg[MAX_MSG_LEN] = "";
 int s_num_players;
 int r_num;
+int s_num;
 
 int loginmenu(SOCKET dosock)
 {
@@ -63,6 +65,9 @@ void OpenMainMenu(SOCKET dosock)
 	recv(dosock, msg, MAX_MSG_LEN, 0);
 
 	if (strcmp(msg, "start game") == 0) {
+		s_num = 1;
+		s_saves[r_num][s_num].stage = 1;
+		s_saves[r_num][s_num].chapter = 1;
 		if (r_num == 1) {
 			player1(dosock);
 		}
@@ -73,8 +78,9 @@ void OpenMainMenu(SOCKET dosock)
 	}
 
 	else if (strcmp(msg, "login data") == 0) {
-		char ch = s_players[r_num].p_num + '0';
+		//char ch = s_players[r_num].p_num + '0';
 
+		sprintf(msg, "아이디 : %s\n", s_players[r_num].ID);
 		strcpy(msg, "아이디 : ");
 		strcat(msg, s_players[r_num].ID);
 		strcat(msg, "\n");
@@ -118,6 +124,17 @@ void OpenMainMenu(SOCKET dosock)
 
 void player1(SOCKET dosock)
 {
+	strcpy(msg, "player1");
+	send(dosock, msg, MAX_MSG_LEN, 0);
+
+	//ch = s_saves[r_num][s_num].chapter + '0';
+	//strcpy(msg, ch);
+	sprintf(msg, "%d", s_saves[r_num][s_num].chapter);
+	send(dosock, msg, MAX_MSG_LEN, 0);
+
+	sprintf(msg, "%d", s_saves[r_num][s_num].stage);
+	send(dosock, msg, MAX_MSG_LEN, 0);
+
 	strcpy(msg, "player1");
 	send(dosock, msg, MAX_MSG_LEN, 0);
 }

@@ -122,7 +122,10 @@ void DoIt(void* param)
 
     getpeername(dosock, (SOCKADDR*)&cliaddr, &len);//상대 소켓 주소 알아내기
     char msg[MAX_MSG_LEN] = "";
-    loginmenu(dosock);
+    if (loginmenu(dosock)) {
+        OpenMainMenu();
+
+    }
 
     while (recv(dosock, msg, strlen(msg), 0) > 0) {//수신
         printf("%s:%d 로부터 recv:%s\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), msg);
