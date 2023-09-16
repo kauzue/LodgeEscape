@@ -18,9 +18,6 @@
     <ClCompile Include="main.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="system.c">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="winsock.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -29,9 +26,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="system.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="winsock.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

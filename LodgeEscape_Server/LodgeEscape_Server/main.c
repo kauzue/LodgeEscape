@@ -1,4 +1,4 @@
-#include "system.h"
+#include "game.h"
 #include "winsock.h"
 
 int main(void)
