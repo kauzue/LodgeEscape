@@ -129,11 +129,13 @@
   <ItemGroup>
     <ClCompile Include="game.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="story.c" />
     <ClCompile Include="system.c" />
     <ClCompile Include="winsock.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h" />
+    <ClInclude Include="story.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="winsock.h" />
   </ItemGroup>

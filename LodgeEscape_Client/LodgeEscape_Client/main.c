@@ -6,4 +6,6 @@ int main(void)
 	InitSystem();
 
 	StartWinsock();
+
+	return 0;
 }
