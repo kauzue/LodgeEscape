@@ -3,34 +3,42 @@
 #include <stdio.h>
 
 #include "game.h"
-
-player_t s_players[NUM_MAX_PLAYERS];
-ending_t s_endings[NUM_MAX_PLAYERS][NUM_MAX_PLAYER_PER_ENDINGS];
+#include "story.h"
 
 enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
 enum Start_Game { CREATE_ROOM_START_GAME, FIND_ROOM_START_GAME, EXIT_START_GAME };
-
+enum Option { LOGIN_DATA_OPTION, LOGOUT_OPTION, EXIT_OPTION };
 
 void Sign_Up();
-void Login();
-void Game_Main_Menu();
+int Login();
+int Game_Main_Menu();
 void Start_Game();
+int Option();
 
 SOCKET sock;
 int g_players_num;
+int g_rooms_num = 0;
+int g_saves_num;
 
 bool InitSystem()
 {
 	FILE* pb = fopen("player.bin", "rb");
+	FILE* sb = fopen("save.bin", "rb");
 
 	if (pb == NULL) {
 		puts("플레이어 파일 오픈 실패");
 		return false;
 	}
+	else if (sb == NULL) {
+		puts("세이브 파일 오픈 실패");
+		goto ERR_SAVE_FILE;
+	}
 
 	g_players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
 
+	fclose(sb);
+ERR_SAVE_FILE:
 	fclose(pb);
 	return true;
 }
@@ -52,7 +60,10 @@ void Game_Login(SOCKET socket)
 		}
 
 		case LOGIN_LOGIN: {
-			Login();
+			int exit = Login();
+			if (exit == -1) {
+				return;
+			}
 			break;
 		}
 
@@ -67,11 +78,18 @@ void Sign_Up()
 {
 	FILE* pb = fopen("player.bin", "ab");
 	if (pb == NULL) {
-		puts("파일오픈 실패!");
+		puts("플레이어 파일 오픈 실패!");
 		return;
 	}
 
+	FILE* sb = fopen("save.bin", "ab");
+	if(sb == NULL) {
+		puts("세이브 파일 오픈 실패!");
+		goto ERR_SAVE_FILE;
+	}
+
 	player_t player;
+	save_t save;
 
 	char msg_char[MAX_MSG_LEN] = "";
 	int msg_int;
@@ -109,20 +127,29 @@ void Sign_Up()
 
 	player.save_num = 0;
 	player.ending_num = 0;
+	save.chapter = 1;
+	save.stage = 1;
 
 	memcpy(&s_players[g_players_num], &player, sizeof(player_t));
 	++g_players_num;
 
+	memcpy(&s_saves[g_saves_num], &save, sizeof(save_t));
+	++g_saves_num;
+
 	fwrite(&player, sizeof(player_t), 1, pb);
+	
 ERR_SIGNUP:
+	fclose(sb);
+ERR_SAVE_FILE:
 	fclose(pb);
 }
 
-void Login()
+int Login()
 {
 	char ID[MAX_MSG_LEN] = "";
 	char PassWord[MAX_MSG_LEN] = "";
 	int msg_int = -1;
+	int save = 0;
 
 	while (msg_int < 0) {
 		recv(sock, ID, MAX_MSG_LEN, 0);
@@ -143,12 +170,17 @@ void Login()
 		}
 
 		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &save, sizeof(save), 0);
 	}
 
-	Game_Main_Menu();
+	int exit = Game_Main_Menu();
+	if (exit == -1) {
+		return -1;
+	}
+	return 0;
 }
 
-void Game_Main_Menu()
+int Game_Main_Menu()
 {
 	int msg_int;
 
@@ -162,10 +194,22 @@ void Game_Main_Menu()
 		}
 
 		case LOAD_GAME_MAIN_MENU: {
+			recv(sock, &msg_int, sizeof(msg_int), 0);
+			send(sock, &s_players[msg_int].save_num, sizeof(s_players[msg_int].save_num), 0);
+
+			for (int i = 0; i < s_players[msg_int].save_num; i++) {
+				send(sock, &s_saves[msg_int][i].stage, sizeof(s_saves[msg_int][i].stage), 0);
+				send(sock, &s_saves[msg_int][i].chapter, sizeof(s_saves[msg_int][i].chapter), 0);
+			}
+
 			break;
 		}
 
 		case OPTION_MAIN_MENU: {
+			int log = Option();
+			if (log == -1) {
+				return 0;
+			}
 			break;
 		}
 
@@ -180,7 +224,7 @@ void Game_Main_Menu()
 		}
 
 		case EXIT_MAIN_MENU: {
-			return;
+			return -1;
 		}
 		}
 	}
@@ -195,10 +239,67 @@ void Start_Game()
 
 		switch (msg_int) {
 		case CREATE_ROOM_START_GAME: {
+			room_t room;
+
+			recv(sock, room.r_name, MAX_MSG_LEN, 0);
+			recv(sock, &room.r_password, sizeof(room.r_password), 0);
+			recv(sock, &room.player1, sizeof(room.player1), 0);
+			if (room.player1 == -1) {
+				goto EXIT_CREATE_ROOM;
+			}
+
+			room.sock1 = sock;
+			room.player2 = -1;
+			room.sock2 = -1;
+			memcpy(&s_rooms[g_rooms_num], &room, sizeof(room_t));
+			++g_rooms_num;
+
+			send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
+
+			while (true) {
+				if (room.player2 != -1) {
+					msg_int = 1;
+					break;
+				}
+			}
+			send(sock, &msg_int, sizeof(msg_int), 0);
+
+			InitStory(sock);
+
+EXIT_CREATE_ROOM:
 			break;
 		}
 
 		case FIND_ROOM_START_GAME: {
+			int room_num, password;
+
+			while(true) {
+				send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
+				if (g_rooms_num == 0) {
+					goto EXIT_FIND_ROOM;
+				}
+
+				for (int i = 0; i < g_rooms_num; i++) {
+					send(sock, s_rooms[i].r_name, MAX_MSG_LEN, 0);
+				}
+
+				recv(sock, &room_num, sizeof(room_num), 0);
+				if (room_num == -1) {
+					goto EXIT_FIND_ROOM;
+				}
+				recv(sock, &s_rooms[room_num].player2, sizeof(s_rooms[room_num].player2), 0);
+
+				recv(sock, &password, sizeof(password), 0);
+				if (s_rooms[room_num].r_password == password) {
+					s_rooms[room_num].sock2 = sock;
+					send(sock, &room_num, sizeof(room_num), 0);
+					break;
+				}
+			}
+
+			InitStory(sock);
+
+EXIT_FIND_ROOM:
 			break;
 		}
 
@@ -206,5 +307,32 @@ void Start_Game()
 			return;
 		}
 		}
+	}
+}
+
+int Option()
+{
+	int msg_int;
+
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+
+	switch (msg_int) {
+	case LOGIN_DATA_OPTION: {
+		recv(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, s_players[msg_int].ID, MAX_MSG_LEN, 0);
+		send(sock, s_players[msg_int].password, MAX_MSG_LEN, 0);
+		send(sock, &s_players[msg_int].player_num, sizeof(s_players[msg_int].player_num), 0);
+		send(sock, &s_players[msg_int].save_num, sizeof(s_players[msg_int].save_num), 0);
+		send(sock, &s_players[msg_int].ending_num, sizeof(s_players[msg_int].ending_num), 0);
+		return 0;
+	}
+
+	case LOGOUT_OPTION: {
+		return -1;
+	}
+
+	case EXIT_OPTION: {
+		return 0;
+	}
 	}
 }
