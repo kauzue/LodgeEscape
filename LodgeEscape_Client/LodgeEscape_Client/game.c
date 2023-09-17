@@ -392,7 +392,8 @@ void Start_Game()
 					printf("다른 플레이어를 기다리는 중");
 
 					recv(sock, &msg_int, sizeof(msg_int), 0);
-					if (msg_int == 1) {
+					if (msg_int >= 0) {
+						send(sock, &msg_int, sizeof(msg_int), 0);
 						InitStory(sock, g_player_num, g_save_num, g_room_num);
 					}
 
@@ -430,6 +431,9 @@ void Start_Game()
 							scanf_s("%d", &password);
 							send(sock, &password, sizeof(password), 0);
 							recv(sock, &msg_int, sizeof(msg_int), 0);
+							if (msg_int >= 0) {
+								break;
+							}
 						}
 					}
 

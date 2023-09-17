@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "game.h"
-#include "story.h"
 
 enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
@@ -15,6 +14,8 @@ int Login();
 int Game_Main_Menu();
 void Start_Game();
 int Option();
+void InitStory();
+void Story();
 
 SOCKET sock;
 int g_players_num;
@@ -241,7 +242,8 @@ void Start_Game()
 		case CREATE_ROOM_START_GAME: {
 			room_t room;
 
-			recv(sock, room.r_name, MAX_MSG_LEN, 0);
+
+recv(sock, room.r_name, MAX_MSG_LEN, 0);
 			recv(sock, &room.r_password, sizeof(room.r_password), 0);
 			recv(sock, &room.player1, sizeof(room.player1), 0);
 			if (room.player1 == -1) {
@@ -255,16 +257,11 @@ void Start_Game()
 			++g_rooms_num;
 
 			send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
+			recv(sock, &msg_int, sizeof(msg_int), 0);
 
-			while (true) {
-				if (room.player2 != -1) {
-					msg_int = 1;
-					break;
-				}
+			if (msg_int >= 0) {
+				InitStory();
 			}
-			send(sock, &msg_int, sizeof(msg_int), 0);
-
-			InitStory(sock);
 
 EXIT_CREATE_ROOM:
 			break;
@@ -272,7 +269,7 @@ EXIT_CREATE_ROOM:
 
 		case FIND_ROOM_START_GAME: {
 			int room_num, password;
-
+			
 			while(true) {
 				send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
 				if (g_rooms_num == 0) {
@@ -297,7 +294,8 @@ EXIT_CREATE_ROOM:
 				}
 			}
 
-			InitStory(sock);
+			send(s_rooms[room_num].sock1, &room_num, sizeof(room_num), 0);
+			InitStory();
 
 EXIT_FIND_ROOM:
 			break;
@@ -335,4 +333,23 @@ int Option()
 		return 0;
 	}
 	}
+}
+
+void InitStory()
+{
+	int player_num;
+	int save_num;
+
+	recv(sock, &player_num, sizeof(player_num), 0);
+	send(sock, s_players[player_num].player_num, sizeof(s_players[player_num].player_num), 0);
+	recv(sock, &save_num, sizeof(save_num), 0);
+	send(sock, &s_saves[player_num][save_num].chapter, sizeof(s_saves[player_num][save_num].chapter), 0);
+	send(sock, &s_saves[player_num][save_num].stage, sizeof(s_saves[player_num][save_num].stage), 0);
+
+	Story();
+}
+
+void Story()
+{
+
 }
