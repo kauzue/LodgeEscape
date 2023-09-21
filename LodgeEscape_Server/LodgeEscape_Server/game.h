@@ -24,8 +24,10 @@ typedef struct room {
 	int r_password;
 	int player1;
 	int player2;
-	SOCKET sock1;
-	SOCKET sock2;
+	SOCKET sock_server1;
+	SOCKET sock_server2;
+	SOCKET sock_client1;
+	SOCKET sock_client2;
 } room_t;
 
 typedef struct save {
@@ -37,7 +39,7 @@ typedef struct ending {
 	int number;
 } ending_t;
 
-typedef struct item {
+typedef struct item { 
 	int number;
 } item_t;
 

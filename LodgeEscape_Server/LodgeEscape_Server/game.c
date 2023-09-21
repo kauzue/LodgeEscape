@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "game.h"
+#include "story.h"
 
 enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
@@ -14,8 +15,7 @@ int Login();
 int Game_Main_Menu();
 void Start_Game();
 int Option();
-void InitStory();
-void Story();
+void Wait(int);
 
 SOCKET sock;
 int g_players_num;
@@ -243,25 +243,23 @@ void Start_Game()
 			room_t room;
 
 
-recv(sock, room.r_name, MAX_MSG_LEN, 0);
+			recv(sock, room.r_name, MAX_MSG_LEN, 0);
 			recv(sock, &room.r_password, sizeof(room.r_password), 0);
 			recv(sock, &room.player1, sizeof(room.player1), 0);
 			if (room.player1 == -1) {
 				goto EXIT_CREATE_ROOM;
 			}
+			recv(sock, &room.sock_client1, sizeof(SOCKET), 0);
 
-			room.sock1 = sock;
 			room.player2 = -1;
-			room.sock2 = -1;
+			room.sock_server1 = sock;
+			room.sock_server2 = sock;
+			room.sock_client2 = room.sock_client1;
 			memcpy(&s_rooms[g_rooms_num], &room, sizeof(room_t));
 			++g_rooms_num;
 
 			send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
-			recv(sock, &msg_int, sizeof(msg_int), 0);
-
-			if (msg_int >= 0) {
-				InitStory();
-			}
+			Wait(g_rooms_num - 1);
 
 EXIT_CREATE_ROOM:
 			break;
@@ -288,14 +286,15 @@ EXIT_CREATE_ROOM:
 
 				recv(sock, &password, sizeof(password), 0);
 				if (s_rooms[room_num].r_password == password) {
-					s_rooms[room_num].sock2 = sock;
 					send(sock, &room_num, sizeof(room_num), 0);
+					recv(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+					send(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+					s_rooms[room_num].sock_server2 = sock;
 					break;
 				}
 			}
-
-			send(s_rooms[room_num].sock1, &room_num, sizeof(room_num), 0);
-			InitStory();
+			
+			InitStory(sock);
 
 EXIT_FIND_ROOM:
 			break;
@@ -335,21 +334,15 @@ int Option()
 	}
 }
 
-void InitStory()
+void Wait(int room_num)
 {
-	int player_num;
-	int save_num;
+	while (true) {
+		if (s_rooms[room_num].sock_server2 != s_rooms[room_num].sock_server1) {
+			break;
+		}
+	}
 
-	recv(sock, &player_num, sizeof(player_num), 0);
-	send(sock, s_players[player_num].player_num, sizeof(s_players[player_num].player_num), 0);
-	recv(sock, &save_num, sizeof(save_num), 0);
-	send(sock, &s_saves[player_num][save_num].chapter, sizeof(s_saves[player_num][save_num].chapter), 0);
-	send(sock, &s_saves[player_num][save_num].stage, sizeof(s_saves[player_num][save_num].stage), 0);
-
-	Story();
+	send(s_rooms[room_num].sock_server1, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+	InitStory(s_rooms[room_num].sock_server1);
 }
 
-void Story()
-{
-
-}

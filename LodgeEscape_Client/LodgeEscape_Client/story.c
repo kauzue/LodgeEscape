@@ -18,14 +18,18 @@ void Player1_Chapter1();
 void InitStory(SOCKET socket, int player_num, int save_num, int room_num)
 {
 	int player_number;
+	int msg_int;
 
 	sock = socket;
 	g_player_num = player_num;
 	g_save_num = save_num;
 	g_room_num = room_num;
 
+	recv(sock, &msg_int, sizeof(msg_int), 0);
 	send(sock, &g_player_num, sizeof(g_player_num), 0);
 	recv(sock, &player_number, sizeof(player_number), 0);
+
+	system("cls");
 
 	if (player_number == 0) {
 		Player0();
@@ -45,7 +49,7 @@ void Player0()
 	recv(sock, &chapter_number, sizeof(chapter_number), 0);
 	recv(sock, &stage_number, sizeof(stage_number), 0);
 
-	switch (chapter_number - 1) {
+	switch (chapter_number) {
 	case CHAPTER1: {
 		Player0_Chapter1();
 		break;
@@ -74,7 +78,7 @@ void Player1()
 	recv(sock, &chapter_number, sizeof(chapter_number), 0);
 	recv(sock, &stage_number, sizeof(stage_number), 0);
 
-	switch (chapter_number - 1) {
+	switch (chapter_number) {
 	case CHAPTER1: {
 		Player1_Chapter1();
 		break;

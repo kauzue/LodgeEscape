@@ -358,7 +358,7 @@ void Start_Game()
 			}
 
 			case DOWN: {
-				if (y < 8) {
+				if (y < 4) {
 					MoveCursor(x - 2, y);
 					printf(" ");
 
@@ -386,16 +386,21 @@ void Start_Game()
 					send(sock, room_name, MAX_MSG_LEN, 0);
 					send(sock, &password, sizeof(password), 0);
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
+					send(sock, &sock, sizeof(SOCKET), 0);
 					recv(sock, &g_room_num, sizeof(g_room_num), 0);
 
 					system("cls");
 					printf("다른 플레이어를 기다리는 중");
 
-					recv(sock, &msg_int, sizeof(msg_int), 0);
-					if (msg_int >= 0) {
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						InitStory(sock, g_player_num, g_save_num, g_room_num);
+					while (true) {
+						;
+						if (recv(sock, &communication.sock, sizeof(SOCKET), 0) >= 0) {
+							break;
+						}
+
 					}
+
+					InitStory(sock, g_player_num, g_save_num, g_room_num);
 
 					break;
 				}
@@ -432,11 +437,13 @@ void Start_Game()
 							send(sock, &password, sizeof(password), 0);
 							recv(sock, &msg_int, sizeof(msg_int), 0);
 							if (msg_int >= 0) {
+								send(sock, &sock, sizeof(SOCKET), 0);
+								recv(sock, &communication.sock, sizeof(SOCKET), 0);
 								break;
 							}
 						}
 					}
-
+					
 					InitStory(sock, g_player_num, g_save_num, g_room_num);
 
 EXIT_FIND_ROOM:
