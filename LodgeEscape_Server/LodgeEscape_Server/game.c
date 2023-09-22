@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "game.h"
-#include "story.h"
 
 enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
@@ -16,8 +15,11 @@ int Game_Main_Menu();
 void Start_Game();
 int Option();
 void Wait(int);
+void InitStory();
+void Story();
 
-SOCKET sock;
+_declspec(thread) SOCKET sock;
+
 int g_players_num;
 int g_rooms_num = 0;
 int g_saves_num;
@@ -51,7 +53,6 @@ void Game_Login(SOCKET socket)
 	char msg_char[MAX_MSG_LEN] = "";
 
 	while (true) {
-
 		recv(sock, &msg_int, sizeof(msg_int), 0);
 
 		switch (msg_int) {
@@ -261,6 +262,8 @@ void Start_Game()
 			send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
 			Wait(g_rooms_num - 1);
 
+			return;
+
 EXIT_CREATE_ROOM:
 			break;
 		}
@@ -295,6 +298,7 @@ EXIT_CREATE_ROOM:
 			}
 			
 			InitStory(sock);
+			return;
 
 EXIT_FIND_ROOM:
 			break;
@@ -346,3 +350,22 @@ void Wait(int room_num)
 	InitStory(s_rooms[room_num].sock_server1);
 }
 
+void InitStory()
+{
+	int player_num;
+	int save_num;
+	int msg_int = 0;
+
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	recv(sock, &player_num, sizeof(player_num), 0);
+	send(sock, &s_players[player_num].player_num, sizeof(s_players[player_num].player_num), 0);
+	recv(sock, &save_num, sizeof(save_num), 0);
+	send(sock, &s_saves[player_num][save_num].chapter, sizeof(s_saves[player_num][save_num].chapter), 0);
+	send(sock, &s_saves[player_num][save_num].stage, sizeof(s_saves[player_num][save_num].stage), 0);
+
+	Story();
+}
+
+void Story()
+{
+}

@@ -402,7 +402,7 @@ void Start_Game()
 
 					InitStory(sock, g_player_num, g_save_num, g_room_num);
 
-					break;
+					return;
 				}
 
 				case FIND_ROOM_START_GAME: {
@@ -445,6 +445,8 @@ void Start_Game()
 					}
 					
 					InitStory(sock, g_player_num, g_save_num, g_room_num);
+
+					return;
 
 EXIT_FIND_ROOM:
 					break;
