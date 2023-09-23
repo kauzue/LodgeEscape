@@ -178,7 +178,7 @@ int Player0_Chapter1()
 			}
 
 			case ENTER: {
-				y = y / 2 - 1;
+				y = y / 2 - 2;
 				system("cls");
 				send(sock, &y, sizeof(y), 0);
 				send(sock, &g_player_num, sizeof(g_player_num), 0);
@@ -273,7 +273,7 @@ int Player1_Chapter1()
 			}
 
 			case ENTER: {
-				y = y / 2 - 1;
+				y = y / 2 - 2;
 				system("cls");
 				send(sock, &y, sizeof(y), 0);
 				send(sock, &g_player_num, sizeof(g_player_num), 0);
