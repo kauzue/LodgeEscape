@@ -371,10 +371,14 @@ int Menu_Game()
 
 				switch (y) {
 				case ITEM: {
+					printf("Item is developing \n");
+					system("pause");
 					break;
 				}
 
 				case SAVE: {
+					printf("Save is developing \n");
+					system("pause");
 					break;
 				}
 

@@ -168,7 +168,6 @@ int Login()
 		send(sock, PassWord, MAX_MSG_LEN, 0);
 
 		recv(sock, &g_player_num, sizeof(g_player_num), 0);
-		recv(sock, &g_save_num, sizeof(g_save_num), 0);
 		if (g_player_num == -2) {
 			return 0;
 		}
@@ -176,6 +175,8 @@ int Login()
 		else if (g_player_num >= 0) {
 			break;
 		}
+		recv(sock, &g_save_num, sizeof(g_save_num), 0);
+
 
 		system("cls");
 

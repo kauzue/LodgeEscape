@@ -30,21 +30,14 @@ int g_saves_num;
 bool InitSystem()
 {
 	FILE* pb = fopen("player.bin", "rb");
-	FILE* sb = fopen("save.bin", "rb");
 
 	if (pb == NULL) {
 		puts("플레이어 파일 오픈 실패");
 		return false;
 	}
-	else if (sb == NULL) {
-		puts("세이브 파일 오픈 실패");
-		goto ERR_SAVE_FILE;
-	}
 
 	g_players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
 
-	fclose(sb);
-ERR_SAVE_FILE:
 	fclose(pb);
 	return true;
 }
@@ -437,23 +430,26 @@ int Menu()
 {
 	int msg_int;
 
-	recv(sock, &msg_int, sizeof(msg_int), 0);
+	while (true) {
 
-	switch (msg_int) {
-	case ITEM_MENU: {
-		break;
-	}
+		recv(sock, &msg_int, sizeof(msg_int), 0);
 
-	case SAVE_MENU: {
-		break;
-	}
+		switch (msg_int) {
+		case ITEM_MENU: {
+			break;
+		}
 
-	case BACK_MENU: {
-		return 0;
-	}
+		case SAVE_MENU: {
+			break;
+		}
 
-	case EXIT_MENU: {
-		return -1;
-	}
+		case BACK_MENU: {
+			return 0;
+		}
+
+		case EXIT_MENU: {
+			return -1;
+		}
+		}
 	}
 }
