@@ -344,7 +344,7 @@ int Menu_Game()
 
 			switch (key) {
 			case UP: {
-				if (y > 2) {
+				if (y > 0) {
 					MoveCursor(x - 2, y);
 					printf(" ");
 					MoveCursor(x - 2, y -= 2);
