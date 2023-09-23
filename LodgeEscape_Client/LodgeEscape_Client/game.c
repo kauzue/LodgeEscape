@@ -378,12 +378,19 @@ void Start_Game()
 					char room_name[MAX_MSG_LEN] = "";
 					int password, msg_int;
 
+					//fflush(stdin);
+					//getc(stdin);
+
 					printf("room name : ");
 					scanf_s("%s", room_name, MAX_MSG_LEN);
 					printf("password : ");
 					scanf_s("%d", &password);
 
 					send(sock, room_name, MAX_MSG_LEN, 0);
+					if (strcmp(room_name, "0") == 0) {
+						getc(stdin);
+						return;
+					}
 					send(sock, &password, sizeof(password), 0);
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					send(sock, &sock, sizeof(SOCKET), 0);
@@ -393,7 +400,6 @@ void Start_Game()
 					printf("다른 플레이어를 기다리는 중");
 
 					while (true) {
-						;
 						if (recv(sock, &communication.sock, sizeof(SOCKET), 0) >= 0) {
 							break;
 						}
@@ -407,7 +413,8 @@ void Start_Game()
 
 				case FIND_ROOM_START_GAME: {
 					char room_name[MAX_MSG_LEN] = "";
-					int msg_int, choice_room, password;
+					int msg_int, password;
+					int choice_room = 0;
 
 					while (true) {
 						recv(sock, &msg_int, sizeof(msg_int), 0);
@@ -421,6 +428,8 @@ void Start_Game()
 							recv(sock, room_name, MAX_MSG_LEN, 0);
 							printf("%d. %s \n \n", i, room_name);
 						}
+
+						//getc(stdin);
 
 						printf("choice : ");
 						scanf_s("%d", &choice_room);
@@ -436,15 +445,25 @@ void Start_Game()
 							scanf_s("%d", &password);
 							send(sock, &password, sizeof(password), 0);
 							recv(sock, &msg_int, sizeof(msg_int), 0);
-							if (msg_int >= 0) {
+							if (msg_int == -1) {
+								system("cls");
+								printf("이미 같은 번호의 플레어어가 입장해 있습니다. \n");
+								system("pause");
+								getc(stdin);
+
+								return;
+							}
+
+							else if (msg_int >= 0) {
 								send(sock, &sock, sizeof(SOCKET), 0);
 								recv(sock, &communication.sock, sizeof(SOCKET), 0);
+								
 								break;
 							}
 						}
 					}
 					
-					InitStory(sock, g_player_num, g_save_num, g_room_num);
+					InitStory(sock, g_player_num, g_save_num, choice_room);
 
 					return;
 

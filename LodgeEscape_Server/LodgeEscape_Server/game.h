@@ -24,6 +24,7 @@ typedef struct room {
 	int r_password;
 	int player1;
 	int player2;
+	int exit_num;
 	SOCKET sock_server1;
 	SOCKET sock_server2;
 	SOCKET sock_client1;
