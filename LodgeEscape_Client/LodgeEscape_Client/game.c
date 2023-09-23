@@ -515,7 +515,7 @@ int Option()
 		}
 
 		case DOWN: {
-			if (y < 8) {
+			if (y < 4) {
 				MoveCursor(x - 2, y);
 				printf(" ");
 

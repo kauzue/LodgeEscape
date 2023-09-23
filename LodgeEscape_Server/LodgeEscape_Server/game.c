@@ -30,16 +30,26 @@ int g_saves_num;
 bool InitSystem()
 {
 	FILE* pb = fopen("player.bin", "rb");
+	FILE* sb = fopen("save.bin", "rb");
 
 	if (pb == NULL) {
 		puts("플레이어 파일 오픈 실패");
 		return false;
 	}
 
+	if (sb == NULL) {
+		puts("세이브 파일 오픈 실패");
+		goto ERR_FILE;
+	}
+
 	g_players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
 
 	fclose(pb);
+	fclose(sb);
 	return true;
+ERR_FILE:
+	fclose(pb);
+	return false;
 }
 
 void Game_Login(SOCKET socket)
