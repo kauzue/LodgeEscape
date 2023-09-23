@@ -36,7 +36,7 @@ void Game_Login(SOCKET socket)
 		y = 0;
 
 		MoveCursor(x - 2, y);
-		printf("> Sign UP");
+		printf("> Sign Up");
 
 		MoveCursor(x, y + 2);
 		printf("Login");
