@@ -171,12 +171,11 @@ int Login()
 		if (g_player_num == -2) {
 			return 0;
 		}
-
-		else if (g_player_num >= 0) {
-			break;
-		}
 		recv(sock, &g_save_num, sizeof(g_save_num), 0);
 
+		if (g_player_num >= 0) {
+			break;
+		}
 
 		system("cls");
 
