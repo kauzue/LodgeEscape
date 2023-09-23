@@ -193,7 +193,6 @@ int Login()
 
 int Game_Main_Menu()
 {
-
 	while (true) {
 		system("cls");
 
