@@ -429,6 +429,8 @@ int Story()
 		}
 		}
 	}
+
+	return -1;
 }
 
 int Menu()
