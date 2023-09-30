@@ -3,6 +3,11 @@
 
 int main(void)
 {
+	bool a = InitGame();
+	if (a == false) {
+		return 0;
+	}
+
 	InitSystem();
 
 	StartWinsock();

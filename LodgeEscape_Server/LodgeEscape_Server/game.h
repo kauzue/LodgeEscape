@@ -51,8 +51,8 @@ typedef struct clue {
 player_t s_players[NUM_MAX_PLAYERS];
 room_t s_rooms[NUM_MAX_ROOMS];
 save_t s_saves[NUM_MAX_PLAYERS][NUM_MAX_PLAYER_PER_SAVES];
+item_t s_items[NUM_MAX_PLAYER_PER_SAVES][NUM_MAX_SAVE_PER_ITEMS];
 ending_t s_endings[NUM_MAX_PLAYERS][NUM_MAX_PLAYER_PER_ENDINGS];
 
 bool InitSystem();
-
 void Game_Login(SOCKET);
