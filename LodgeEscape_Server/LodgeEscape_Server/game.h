@@ -32,6 +32,7 @@ typedef struct room {
 } room_t;
 
 typedef struct save {
+	int player_num;
 	int stage;
 	int chapter;
 } save_t;

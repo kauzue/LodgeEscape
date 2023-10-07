@@ -9,7 +9,7 @@ int g_player_num;
 int g_save_num;
 int g_room_num;
 
-enum Chapter { CHAPTER1, CHAPTER2, CHAPTER3, CHAPTER4 };
+enum Chapter { CHAPTER0, CHAPTER1, CHAPTER2, CHAPTER3, CHAPTER4 };
 enum Stage { STAGE1, STAGE2, STAGE3, STAGE4 };
 enum _011 { EXPLORE_011, INVESTIGATE_011, MENU_011 };
 enum _111 { EXPLORE_111, INVESTIGATE_111, MENU_111 };
@@ -17,8 +17,8 @@ enum Menu { ITEM, SAVE, BACK, EXIT };
 
 int Player0();
 int Player1();
-int Player0_Chapter1();
-int Player1_Chapter1();
+int Player0_Chapter0();
+int Player1_Chapter0();
 int Menu_Game();
 void Exit_Game();
 
@@ -64,13 +64,15 @@ int Player0()
 	recv(sock, &stage_number, sizeof(stage_number), 0);
 
 	switch (chapter_number) {
+	case CHAPTER0: {
+		exit = Player0_Chapter0();
+		break;
+	}
 	case CHAPTER1: {
-		exit = Player0_Chapter1();
 		break;
 	}
 
 	case CHAPTER2: {
-		printf("¼º°ø");
 		break;
 	}
 
@@ -100,8 +102,12 @@ int Player1()
 	recv(sock, &stage_number, sizeof(stage_number), 0);
 
 	switch (chapter_number) {
+	case CHAPTER0: {
+		exit = Player1_Chapter0();
+		break;
+	}
+
 	case CHAPTER1: {
-		exit = Player1_Chapter1();
 		break;
 	}
 
@@ -124,7 +130,7 @@ int Player1()
 	return 0;
 }
 
-int Player0_Chapter1()
+int Player0_Chapter0()
 {
 	int x, y;
 	int key;
@@ -193,10 +199,17 @@ int Player0_Chapter1()
 				}
 
 				case INVESTIGATE_011: {
+					int msg_int = 3;
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ÀÌ ÀÖ´Ù. \n \n");
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ È¹µæ \n");
 					system("pause");
 					investigate++;
+					if (investigate == 1) {
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						for (int i = 10; i < msg_int * 10 + 1; i += 10) {
+							send(sock, &i, sizeof(i), 0);
+						}
+					}
 					break;
 				}
 
@@ -220,7 +233,7 @@ int Player0_Chapter1()
 	return -1;
 }
 
-int Player1_Chapter1()
+int Player1_Chapter0()
 {
 	int x, y;
 	int key;

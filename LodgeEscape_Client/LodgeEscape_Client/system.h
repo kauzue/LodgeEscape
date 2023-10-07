@@ -4,43 +4,27 @@
 #include <stdbool.h>
 
 #define MAX_MSG_LEN 256
-#define MAX_ITEMS_NUM 10
-#define MAX_CLUES_NUM 10
+#define MAX_ITEMS_NUM 200000
+#define MAX_CLUES_NUM 200000
 
 enum KEY { UP, DOWN, LEFT, RIGHT, ENTER };
 
 typedef struct item_player_1 {
-	float number;
+	int number;
 	char name[MAX_MSG_LEN];
 	char explaination[MAX_MSG_LEN];
 	bool use;
-} item_t_1;
+} item_t;
 
 typedef struct clue_player_1 {
-	float number;
+	int number;
 	char name[MAX_MSG_LEN];
 	char explaination[MAX_MSG_LEN];
 	bool use;
-} clue_t_1;
+} clue_t;
 
-typedef struct item_player_2 {
-	float number;
-	char name[MAX_MSG_LEN];
-	char explaination[MAX_MSG_LEN];
-	bool use;
-} item_t_2;
-
-typedef struct clue_player_2 {
-	float number;
-	char name[MAX_MSG_LEN];
-	char explaination[MAX_MSG_LEN];
-	bool use;
-} clue_t_2;
-
-item_t_1 s_items_1[MAX_ITEMS_NUM];
-clue_t_1 s_clues_1[MAX_CLUES_NUM];
-item_t_2 s_items_2[MAX_ITEMS_NUM];
-clue_t_2 s_clues_2[MAX_CLUES_NUM];
+item_t s_items[MAX_ITEMS_NUM];
+clue_t s_clues[MAX_CLUES_NUM];
 
 bool InitSystem();
 bool InitGame();
