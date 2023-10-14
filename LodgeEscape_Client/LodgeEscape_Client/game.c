@@ -20,6 +20,8 @@ int Option();
 SOCKET sock;
 int g_player_num;
 int g_save_num;
+int g_item_num;
+int g_clue_num;
 int g_room_num;
 
 void Game_Login(SOCKET socket)
@@ -255,26 +257,29 @@ int Game_Main_Menu()
 				}
 
 				case LOAD_GAME_MAIN_MENU: {
+					int item;
+					int clue;
 					int stage;
 					int chapter;
 					int choice_save;
 
-					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					recv(sock, &msg_int, sizeof(msg_int), 0);
-					if (msg_int == 0) {
-						printf("현재 저장한 게임 데이터가 없습니다. \n");
-						system("pause");
-						break;
-					}
+					send(sock, &g_player_num, sizeof(g_player_num), 0);
+
 					while (true) {
 						for (int i = 0; i < msg_int; i++) {
 							recv(sock, &stage, sizeof(stage), 0);
 							recv(sock, &chapter, sizeof(chapter), 0);
-							printf("%d. %d스테이지 %d챕터 \n", i + 1, stage, chapter);
+							recv(sock, &item, sizeof(item), 0);
+							recv(sock, &clue, sizeof(clue), 0);
+							printf("%02d. %d스테이지 %d챕터 / 아이템 : %d개 단서 : %d개 \n", i + 1, stage, chapter, item, clue);
 						}
 						printf("선택 : ");
 						scanf_s("%d", &choice_save);
-						if (choice_save >= 0 || choice_save < msg_int) {
+						if (choice_save == 0) {
+							break;
+						}
+						else if (choice_save > 0 || choice_save < msg_int) {
 							g_save_num = choice_save;
 							break;
 						}
@@ -540,8 +545,7 @@ int Option()
 				printf("플레이어 비밀번호 : %s \n", msg_char);
 				recv(sock, &msg_int, sizeof(msg_int), 0);
 				printf("플레이어 번호 : %d \n", msg_int);
-				recv(sock, &msg_int, sizeof(msg_int), 0);
-				printf("플레이어 세이브 개수 : %d \n", msg_int);
+				printf("현재 세이브 번호 : %d \n", g_save_num);
 				recv(sock, &msg_int, sizeof(msg_int), 0);
 				printf("플레이어 엔딩 개수 : %d \n", msg_int);
 

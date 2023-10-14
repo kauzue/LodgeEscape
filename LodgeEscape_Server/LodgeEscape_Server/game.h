@@ -33,6 +33,8 @@ typedef struct room {
 
 typedef struct save {
 	int player_num;
+	int item_num;
+	int clue_num;
 	int stage;
 	int chapter;
 } save_t;

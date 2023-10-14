@@ -7,6 +7,7 @@
 SOCKET sock;
 int g_player_num;
 int g_save_num;
+int g_item_num;
 int g_room_num;
 
 enum Chapter { CHAPTER0, CHAPTER1, CHAPTER2, CHAPTER3, CHAPTER4 };
@@ -186,8 +187,6 @@ int Player0_Chapter0()
 			case ENTER: {
 				y = y / 2 - 2;
 				system("cls");
-				send(sock, &y, sizeof(y), 0);
-				send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 				switch (y) {
 				case EXPLORE_011: {
@@ -199,16 +198,16 @@ int Player0_Chapter0()
 				}
 
 				case INVESTIGATE_011: {
-					int msg_int = 3;
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ÀÌ ÀÖ´Ù. \n \n");
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ È¹µæ \n");
 					system("pause");
 					investigate++;
 					if (investigate == 1) {
+						int msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
-						for (int i = 10; i < msg_int * 10 + 1; i += 10) {
-							send(sock, &i, sizeof(i), 0);
-						}
+						
+						msg_int = 3;
+						send(sock, &msg_int, sizeof(msg_int), 0);
 					}
 					break;
 				}
@@ -227,10 +226,6 @@ int Player0_Chapter0()
 
 		}
 	}
-
-	printf("¼º°ø \n");
-	Exit_Game();
-	return -1;
 }
 
 int Player1_Chapter0()
@@ -323,9 +318,6 @@ int Player1_Chapter0()
 
 		}
 	}
-
-	Exit_Game();
-	return -1;
 }
 
 int Menu_Game()
