@@ -23,7 +23,9 @@ typedef struct room {
 	char r_name[MAX_MSG_LEN];
 	int r_password;
 	int player1;
+	int player1_chapter;
 	int player2;
+	int player2_chapter;
 	int exit_num;
 	SOCKET sock_server1;
 	SOCKET sock_server2;

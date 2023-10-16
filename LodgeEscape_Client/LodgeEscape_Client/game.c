@@ -139,7 +139,7 @@ void Sign_Up()
 
 		printf("player number : ");
 		scanf_s("%d", &msg_int);
-		if (msg_int > -1 || msg_int < 2) {
+		if (msg_int > -1 && msg_int < 2) {
 			send(sock, &msg_int, sizeof(msg_int), 0);
 			break;
 		}
@@ -267,6 +267,8 @@ int Game_Main_Menu()
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 					while (true) {
+						system("cls");
+
 						for (int i = 0; i < msg_int; i++) {
 							recv(sock, &stage, sizeof(stage), 0);
 							recv(sock, &chapter, sizeof(chapter), 0);
@@ -276,17 +278,17 @@ int Game_Main_Menu()
 						}
 						printf("선택 : ");
 						scanf_s("%d", &choice_save);
-						if (choice_save == 0) {
-							break;
-						}
-						else if (choice_save > 0 || choice_save < msg_int) {
-							g_save_num = choice_save;
+						if (choice_save > 0 && choice_save < msg_int + 1) {
+							g_save_num = choice_save - 1;
+							send(sock, &g_save_num, sizeof(g_save_num), 0);
 							break;
 						}
 
+						msg_int = 20;
 						system("cls");
 						printf("다시 선택해 주세요. \n");
-						system("puase");
+						system("pause");
+						send(sock, &msg_int, sizeof(msg_int), 0);
 					}
 
 					break;
@@ -399,6 +401,7 @@ void Start_Game()
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					send(sock, &sock, sizeof(SOCKET), 0);
 					recv(sock, &g_room_num, sizeof(g_room_num), 0);
+					send(sock, &g_save_num, sizeof(g_save_num), 0);
 
 					system("cls");
 					printf("다른 플레이어를 기다리는 중");
@@ -421,6 +424,7 @@ void Start_Game()
 					int choice_room = 0;
 
 					while (true) {
+						system("cls");
 						recv(sock, &msg_int, sizeof(msg_int), 0);
 						if (msg_int == 0) {
 							printf("현재 개설된 방이 없습니다.");
@@ -438,10 +442,11 @@ void Start_Game()
 						printf("choice : ");
 						scanf_s("%d", &choice_room);
 						if (choice_room == -1) {
+							send(sock, &choice_room, sizeof(choice_room), 0);
 							goto EXIT_FIND_ROOM;
 						}
 
-						else if (choice_room >= 0 && choice_room <= msg_int) {
+						else if (choice_room >= 0 && choice_room < msg_int) {
 							send(sock, &choice_room, sizeof(choice_room), 0);
 							send(sock, &g_player_num, sizeof(g_player_num), 0);
 
@@ -461,9 +466,21 @@ void Start_Game()
 							else if (msg_int >= 0) {
 								send(sock, &sock, sizeof(SOCKET), 0);
 								recv(sock, &communication.sock, sizeof(SOCKET), 0);
+								send(sock, &g_save_num, sizeof(g_save_num), 0);
+								recv(sock, &msg_int, sizeof(msg_int), 0);
+								if (msg_int == 0) {
+									printf("선택하신 챕터가 다릅니다. 이 방의 챕터와 다릅니다. 다시 시도해 주세요.");
+									return;
+								}
 								
 								break;
 							}
+						}
+						else {
+							choice_room = -2;
+							send(sock, &choice_room, sizeof(choice_room), 0);
+							printf("개설된 방 중 하나를 선택해 주세요. \n");
+							system("pause");
 						}
 					}
 					
@@ -545,7 +562,7 @@ int Option()
 				printf("플레이어 비밀번호 : %s \n", msg_char);
 				recv(sock, &msg_int, sizeof(msg_int), 0);
 				printf("플레이어 번호 : %d \n", msg_int);
-				printf("현재 세이브 번호 : %d \n", g_save_num);
+				printf("현재 세이브 번호 : %d \n", g_save_num + 1);
 				recv(sock, &msg_int, sizeof(msg_int), 0);
 				printf("플레이어 엔딩 개수 : %d \n", msg_int);
 

@@ -135,6 +135,7 @@ int Player0_Chapter0()
 {
 	int x, y;
 	int key;
+	int msg_int;
 	int explore = 0;
 	int investigate = 0;
 	int exit = 0;
@@ -198,14 +199,14 @@ int Player0_Chapter0()
 				}
 
 				case INVESTIGATE_011: {
+					send(sock, &msg_int, sizeof(msg_int), 0);
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ÀÌ ÀÖ´Ù. \n \n");
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ È¹µæ \n");
 					system("pause");
 					investigate++;
 					if (investigate == 1) {
-						int msg_int = 0;
+						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
-						
 						msg_int = 3;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 					}
@@ -213,6 +214,8 @@ int Player0_Chapter0()
 				}
 
 				case MENU_011: {
+					msg_int = 1;
+					send(sock, &msg_int, sizeof(msg_int), 0);
 					exit = Menu_Game();
 					if (exit == -1) {
 						return -1;
@@ -232,6 +235,7 @@ int Player1_Chapter0()
 {
 	int x, y;
 	int key;
+	int msg_int;
 	int explore = 0;
 	int investigate = 0;
 	int exit = 0;
@@ -283,8 +287,6 @@ int Player1_Chapter0()
 			case ENTER: {
 				y = y / 2 - 2;
 				system("cls");
-				send(sock, &y, sizeof(y), 0);
-				send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 				switch (y) {
 				case EXPLORE_011: {
@@ -297,6 +299,8 @@ int Player1_Chapter0()
 				}
 
 				case INVESTIGATE_011: {
+					msg_int = 0;
+					send(sock, &msg_int, sizeof(msg_int), 0);
 					printf("Áö°© ¿Ü¿¡ ´Ù¸¥ ´Ü¼­´Â ¾Æ¹«°Íµµ ¾ø´Ù. \n \n");
 					printf("Áö°© È¹µæ \n");
 					system("pause");
@@ -305,6 +309,8 @@ int Player1_Chapter0()
 				}
 
 				case MENU_011: {
+					msg_int = 1;
+					send(sock, &msg_int, sizeof(msg_int), 0);
 					exit = Menu_Game();
 					if (exit == -1) {
 						return -1;

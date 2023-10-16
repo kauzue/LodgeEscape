@@ -201,7 +201,7 @@ int Login()
 			send(sock, &msg_int, sizeof(msg_int), 0);
 			continue;
 		}
-		msg_int = 1;
+		msg_int = 0;
 
 		send(sock, &msg_int, sizeof(msg_int), 0);
 	}
@@ -228,16 +228,24 @@ int Game_Main_Menu()
 
 		case LOAD_GAME_MAIN_MENU: {
 
-
 			msg_int = NUM_MAX_PLAYER_PER_SAVES;
 			send(sock, &msg_int, sizeof(msg_int), 0);
-			recv(sock, &msg_int, sizeof(msg_int), 0);
+			recv(sock, &g_players_num, sizeof(g_players_num), 0);
 
-			for (int i = 0; i < NUM_MAX_PLAYER_PER_SAVES; i++) {
-				send(sock, &s_saves[msg_int][i].stage, sizeof(s_saves[msg_int][i].stage), 0);
-				send(sock, &s_saves[msg_int][i].chapter, sizeof(s_saves[msg_int][i].chapter), 0);
-				send(sock, &s_saves[msg_int][i].item_num, sizeof(s_saves[msg_int][i].item_num), 0);
-				send(sock, &s_saves[msg_int][i].clue_num, sizeof(s_saves[msg_int][i].clue_num), 0);
+			while (true) {
+				for (int i = 0; i < NUM_MAX_PLAYER_PER_SAVES; i++) {
+					send(sock, &s_saves[g_players_num][i].stage, sizeof(s_saves[g_players_num][i].stage), 0);
+					send(sock, &s_saves[g_players_num][i].chapter, sizeof(s_saves[g_players_num][i].chapter), 0);
+					send(sock, &s_saves[g_players_num][i].item_num, sizeof(s_saves[g_players_num][i].item_num), 0);
+					send(sock, &s_saves[g_players_num][i].clue_num, sizeof(s_saves[g_players_num][i].clue_num), 0);
+				}
+				recv(sock, &msg_int, sizeof(msg_int), 0);
+				if (msg_int != 20) {
+					break;
+				}
+			}
+			if (msg_int == 0) {
+				s_saves[g_players_num][msg_int].chapter = 1;
 			}
 
 			break;
@@ -279,7 +287,6 @@ void Start_Game()
 		case CREATE_ROOM_START_GAME: {
 			room_t room;
 
-
 			recv(sock, room.r_name, MAX_MSG_LEN, 0);
 			if (strcmp(room.r_name, "0") == 0) {
 				return;
@@ -292,6 +299,9 @@ void Start_Game()
 			recv(sock, &room.sock_client1, sizeof(SOCKET), 0);
 			send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
 
+			recv(sock, &msg_int, sizeof(msg_int), 0);
+			room.player1_chapter = s_saves[room.player1][msg_int].chapter;
+			room.player2_chapter = s_saves[room.player1][msg_int].chapter;
 			room.player2 = -1;
 			room.sock_server1 = sock;
 			room.sock_server2 = sock;
@@ -325,6 +335,9 @@ EXIT_CREATE_ROOM:
 				if (room_num == -1) {
 					goto EXIT_FIND_ROOM;
 				}
+				else if (room_num == -2) {
+					continue;
+				}
 				recv(sock, &s_rooms[room_num].player2, sizeof(s_rooms[room_num].player2), 0);
 
 				recv(sock, &password, sizeof(password), 0);
@@ -339,13 +352,15 @@ EXIT_CREATE_ROOM:
 
 					recv(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
 					send(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+					recv(sock, &msg_int, sizeof(msg_int), 0);
+					s_rooms[room_num].player2_chapter = s_saves[s_rooms[room_num].player2][msg_int].chapter;
 					s_rooms[room_num].sock_server2 = sock;
 					g_rooms_num--;
 					break;
 				}
 			}
 			
-			InitStory(sock);
+			Wait(room_num);
 			return;
 
 EXIT_FIND_ROOM:
@@ -387,6 +402,18 @@ int Option()
 
 void Wait(int room_num)
 {
+	int msg_int = 0;
+
+	if (s_rooms[room_num].player1_chapter != s_rooms[room_num].player2_chapter) {
+		send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		return;
+	}
+
+	else {
+		msg_int = 1;
+		send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+	}
+
 	while (true) {
 		if (s_rooms[room_num].sock_server2 != s_rooms[room_num].sock_server1) {
 			break;
@@ -434,9 +461,6 @@ int Story()
 
 	while (true) {
 		recv(sock, &msg_int, sizeof(msg_int), 0);
-		if (msg_int == -1) {
-			return msg_int;
-		}
 
 		switch (msg_int) {
 		case ITEM: {
@@ -447,7 +471,14 @@ int Story()
 		}
 
 		case MENU: {
+			msg_int = Menu();
+			if (msg_int == -1) {
+				return -1;
+			}
 
+			else if (msg_int == 0) {
+				return 0;
+			}
 		}
 		}
 	}
