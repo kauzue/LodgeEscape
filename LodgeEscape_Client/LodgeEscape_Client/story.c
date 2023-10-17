@@ -15,12 +15,17 @@ enum Stage { STAGE1, STAGE2, STAGE3, STAGE4 };
 enum _011 { EXPLORE_011, INVESTIGATE_011, MENU_011 };
 enum _111 { EXPLORE_111, INVESTIGATE_111, MENU_111 };
 enum Menu { ITEM, SAVE, BACK, EXIT };
+enum Item {
+	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
+	NOTE_2 = 100040
+};
 
 int Player0();
 int Player1();
 int Player0_Chapter0();
 int Player1_Chapter0();
 int Menu_Game();
+void Item();
 void Exit_Game();
 
 void InitStory(SOCKET socket, int player_num, int save_num, int room_num)
@@ -199,15 +204,27 @@ int Player0_Chapter0()
 				}
 
 				case INVESTIGATE_011: {
+					msg_int = 0;
 					send(sock, &msg_int, sizeof(msg_int), 0);
+					send(sock, &g_save_num, sizeof(g_save_num), 0);
+					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					printf("손전등, 지갑, 수첩이 있다. \n \n");
 					printf("손전등, 지갑, 수첩 획득 \n");
 					system("pause");
 					investigate++;
 					if (investigate == 1) {
-						msg_int = 0;
-						send(sock, &msg_int, sizeof(msg_int), 0);
 						msg_int = 3;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						msg_int = 10;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						msg_int = 20;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						msg_int = 50;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+					}
+
+					else {
+						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 					}
 					break;
@@ -301,10 +318,25 @@ int Player1_Chapter0()
 				case INVESTIGATE_011: {
 					msg_int = 0;
 					send(sock, &msg_int, sizeof(msg_int), 0);
-					printf("지갑 외에 다른 단서는 아무것도 없다. \n \n");
-					printf("지갑 획득 \n");
-					system("pause");
+					send(sock, &g_save_num, sizeof(g_save_num), 0);
+					send(sock, &g_player_num, sizeof(g_player_num), 0);
+					printf("지갑과 수첩이 있다. \n \n");
+					printf("지갑, 수첩 획득 \n");
 					investigate++;
+					if (investigate == 1) {
+						msg_int = 2;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						msg_int = 100010;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						msg_int = 100040;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+					}
+
+					else {
+						msg_int = 0;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+					}
+					system("pause");
 					break;
 				}
 
@@ -330,6 +362,7 @@ int Menu_Game()
 {
 	int x, y;
 	int key;
+	int msg_int;
 
 	while (true) {
 		key = 0;
@@ -382,8 +415,7 @@ int Menu_Game()
 
 				switch (y) {
 				case ITEM: {
-					printf("Item is developing \n");
-					system("pause");
+					Item();
 					break;
 				}
 
@@ -405,6 +437,89 @@ int Menu_Game()
 			}
 			}
 		}
+	}
+}
+
+void Item()
+{
+	int msg_int;
+	int item, item_num;
+
+	send(sock, &g_save_num, sizeof(g_save_num), 0);
+	send(sock, &g_player_num, sizeof(g_player_num), 0);
+	recv(sock, &item_num, sizeof(item_num), 0);
+	if (item_num == 0) {
+		printf("현재 가진 아이템이 없습니다. \n");
+		system("pause");
+		return;
+	}
+
+	for (int i = 0; i < item_num; i++) {
+		recv(sock, &item, sizeof(item), 0);
+		printf("%d. %s \n", item, s_items[item].name);
+		printf("%s \n", s_items[item].explaination);
+		if (s_items[item].use == true) {
+			printf("사용 가능 \n \n");
+		}
+
+		else {
+			printf("\n");
+		}
+	}
+
+	printf("선택 : ");
+	scanf_s("%d", &msg_int);
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	system("cls");
+
+	switch (msg_int) {
+	case FLASH: {
+		printf("아직 사용할 수 없습니다. \n");
+		system("pause");
+		break;
+	}
+
+	case FLASH_BATTERY: {
+		printf("이 아이템을 지니고 있지 않습니다. \n");
+		system("pause");
+		break;
+	}
+
+	case FLASH_LIGHT: {
+		printf("이 아이템을 지니고 있지 않습니다. \n");
+		system("pause");
+		break;
+	}
+
+	case WALLET_1: {
+		printf("돈과 신분증을 얻었다. \n");
+		system("pause");
+		break;
+	}
+
+	case NOTE_1: {
+		printf("아직 사용할 수 없습니다. \n");
+		system("pause");
+		break;
+	}
+
+	case WALLET_2: {
+		printf("돈과 신분증을 얻었다. \n");
+		system("pause");
+		break;
+	}
+
+	case NOTE_2: {
+		printf("아직 사용할 수 없습니다. \n");
+		system("pause");
+		break;
+	}
+
+	default: {
+		printf("이 아이템은 사용할 수 없거나 지니고 있지 않습니다. \n");
+		system("pause");
+		break;
+	}
 	}
 }
 

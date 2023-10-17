@@ -21,7 +21,7 @@ typedef struct player {
 
 typedef struct room {
 	char r_name[MAX_MSG_LEN];
-	int r_password;
+	char r_password[MAX_MSG_LEN];
 	int player1;
 	int player1_chapter;
 	int player2;

@@ -10,6 +10,10 @@ enum Start_Game { CREATE_ROOM_START_GAME, FIND_ROOM_START_GAME, EXIT_START_GAME 
 enum Option { LOGIN_DATA_OPTION, LOGOUT_OPTION, EXIT_OPTION };
 enum Story { ITEM, MENU };
 enum Menu { ITEM_MENU, SAVE_MENU, BACK_MENU, EXIT_MENU };
+enum Item {
+	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
+	NOTE_2 = 100040
+};
 
 void Sign_Up();
 int Login();
@@ -20,6 +24,7 @@ void Wait(int);
 void InitStory();
 int Story();
 int Menu();
+void Item();
 
 _declspec(thread) SOCKET sock;
 
@@ -244,9 +249,6 @@ int Game_Main_Menu()
 					break;
 				}
 			}
-			if (msg_int == 0) {
-				s_saves[g_players_num][msg_int].chapter = 1;
-			}
 
 			break;
 		}
@@ -291,7 +293,7 @@ void Start_Game()
 			if (strcmp(room.r_name, "0") == 0) {
 				return;
 			}
-			recv(sock, &room.r_password, sizeof(room.r_password), 0);
+			recv(sock, room.r_password, MAX_MSG_LEN, 0);
 			recv(sock, &room.player1, sizeof(room.player1), 0);
 			if (room.player1 == -1) {
 				goto EXIT_CREATE_ROOM;
@@ -319,7 +321,8 @@ EXIT_CREATE_ROOM:
 		}
 
 		case FIND_ROOM_START_GAME: {
-			int room_num, password;
+			int room_num;
+			char password[MAX_MSG_LEN];
 			
 			while(true) {
 				send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
@@ -340,8 +343,8 @@ EXIT_CREATE_ROOM:
 				}
 				recv(sock, &s_rooms[room_num].player2, sizeof(s_rooms[room_num].player2), 0);
 
-				recv(sock, &password, sizeof(password), 0);
-				if (s_rooms[room_num].r_password == password) {
+				recv(sock, password, MAX_MSG_LEN, 0);
+				if (strcmp(s_rooms[room_num].r_password, password) == 0) {
 					if (s_players[s_rooms[room_num].player1].player_num == s_players[s_rooms[room_num].player2].player_num) {
 						room_num = -1;
 					}
@@ -409,9 +412,11 @@ void Wait(int room_num)
 		return;
 	}
 
-	else {
+	else if(s_rooms[room_num].sock_server1 != s_rooms[room_num].sock_server2) {
 		msg_int = 1;
 		send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		InitStory();
+		return;
 	}
 
 	while (true) {
@@ -421,7 +426,7 @@ void Wait(int room_num)
 	}
 
 	send(s_rooms[room_num].sock_server1, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
-	InitStory(s_rooms[room_num].sock_server1);
+	InitStory();
 }
 
 void InitStory()
@@ -457,17 +462,21 @@ void InitStory()
 
 int Story()
 {
-	int msg_int;
+	int msg_int, save_num, player_num;
 
 	while (true) {
 		recv(sock, &msg_int, sizeof(msg_int), 0);
 
 		switch (msg_int) {
 		case ITEM: {
+			recv(sock, &save_num, sizeof(save_num), 0);
+			recv(sock, &player_num, sizeof(player_num), 0);
 			recv(sock, &msg_int, sizeof(msg_int), 0);
 			for (int i = 0; i < msg_int; i++) {
-				recv(sock, &msg_int, sizeof(msg_int), 0);
+				recv(sock, &s_items[save_num][s_saves[player_num][save_num].item_num].number, sizeof(int), 0);
+				s_saves[player_num][save_num].item_num++;
 			}
+			break;
 		}
 
 		case MENU: {
@@ -475,10 +484,7 @@ int Story()
 			if (msg_int == -1) {
 				return -1;
 			}
-
-			else if (msg_int == 0) {
-				return 0;
-			}
+			break;
 		}
 		}
 	}
@@ -495,6 +501,7 @@ int Menu()
 
 		switch (msg_int) {
 		case ITEM_MENU: {
+			Item();
 			break;
 		}
 
@@ -511,4 +518,93 @@ int Menu()
 		}
 		}
 	}
+}
+
+void Item()
+{
+	int msg_int;
+	int save_num, player_num;
+
+	recv(sock, &save_num, sizeof(save_num), 0);
+	recv(sock, &player_num, sizeof(player_num), 0);
+	send(sock, &s_saves[player_num][save_num].item_num, sizeof(int), 0);
+	if (s_saves[player_num][save_num].item_num == 0) {
+		return;
+	}
+
+	for (int i = 0; i < s_saves[player_num][save_num].item_num; i++) {
+		send(sock, &s_items[save_num][i].number, sizeof(s_items[save_num][i].number), 0);
+	}
+
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+
+	switch (msg_int) {
+	case FLASH: {
+		break;
+	}
+
+	case FLASH_BATTERY: {
+		for (int i = 0; i < s_saves[player_num][save_num].item_num; i++) {
+			if (s_items[save_num][i].number == msg_int) {
+				s_items[save_num][i].number = 12;
+				break;
+			}
+		}
+		break;
+	}
+
+	case FLASH_LIGHT: {
+		for (int i = 0; i < s_saves[player_num][save_num].item_num; i++) {
+			if (s_items[save_num][i].number == msg_int) {
+				s_items[save_num][i].number = 11;
+				break;
+			}
+		}
+		break;
+	}
+
+	case WALLET_1: {
+		for (int i = 0; i < s_saves[player_num][save_num].item_num; i++) {
+			if (s_items[save_num][i].number == msg_int) {
+				s_items[save_num][i].number = 21;
+				break;
+			}
+		}
+
+		s_items[save_num][s_saves[player_num][save_num].item_num].number = 30;
+		s_saves[player_num][save_num].item_num++;
+		s_items[save_num][s_saves[player_num][save_num].item_num].number = 40;
+		s_saves[player_num][save_num].item_num++;
+		break;
+	}
+
+	case NOTE_1: {
+		break;
+	}
+
+	case WALLET_2: {
+		for (int i = 0; i < s_saves[player_num][save_num].item_num; i++) {
+			if (s_items[save_num][i].number == msg_int) {
+				s_items[save_num][i].number = 100011;
+				break;
+			}
+		}
+
+		s_items[save_num][s_saves[player_num][save_num].item_num].number = 100020;
+		s_saves[player_num][save_num].item_num++;
+		s_items[save_num][s_saves[player_num][save_num].item_num].number = 100030;
+		s_saves[player_num][save_num].item_num++;
+		break;
+	}
+
+	case NOTE_2: {
+		break;
+	}
+
+	default: {
+		break;
+	}
+	}
+
+	return;
 }

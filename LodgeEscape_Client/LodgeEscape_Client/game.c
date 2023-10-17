@@ -382,7 +382,8 @@ void Start_Game()
 				switch (y) {
 				case CREATE_ROOM_START_GAME: {
 					char room_name[MAX_MSG_LEN] = "";
-					int password, msg_int;
+					char password[MAX_MSG_LEN];
+					int msg_int;
 
 					//fflush(stdin);
 					//getc(stdin);
@@ -390,14 +391,14 @@ void Start_Game()
 					printf("room name : ");
 					scanf_s("%s", room_name, MAX_MSG_LEN);
 					printf("password : ");
-					scanf_s("%d", &password);
+					scanf_s("%s", password, MAX_MSG_LEN);
 
 					send(sock, room_name, MAX_MSG_LEN, 0);
 					if (strcmp(room_name, "0") == 0) {
 						getc(stdin);
 						return;
 					}
-					send(sock, &password, sizeof(password), 0);
+					send(sock, password, MAX_MSG_LEN, 0);
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					send(sock, &sock, sizeof(SOCKET), 0);
 					recv(sock, &g_room_num, sizeof(g_room_num), 0);
@@ -420,7 +421,8 @@ void Start_Game()
 
 				case FIND_ROOM_START_GAME: {
 					char room_name[MAX_MSG_LEN] = "";
-					int msg_int, password;
+					char password[MAX_MSG_LEN];
+					int msg_int;
 					int choice_room = 0;
 
 					while (true) {
@@ -451,8 +453,8 @@ void Start_Game()
 							send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 							printf("password : ");
-							scanf_s("%d", &password);
-							send(sock, &password, sizeof(password), 0);
+							scanf_s("%s", password, MAX_MSG_LEN);
+							send(sock, password, MAX_MSG_LEN, 0);
 							recv(sock, &msg_int, sizeof(msg_int), 0);
 							if (msg_int == -1) {
 								system("cls");
