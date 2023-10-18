@@ -262,33 +262,38 @@ int Game_Main_Menu()
 					int stage;
 					int chapter;
 					int choice_save;
+					int i = 0;
 
-					recv(sock, &msg_int, sizeof(msg_int), 0);
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 					while (true) {
 						system("cls");
 
-						for (int i = 0; i < msg_int; i++) {
-							recv(sock, &stage, sizeof(stage), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						for (i; i < msg_int; i++) {
 							recv(sock, &chapter, sizeof(chapter), 0);
+							recv(sock, &stage, sizeof(stage), 0);
 							recv(sock, &item, sizeof(item), 0);
 							recv(sock, &clue, sizeof(clue), 0);
-							printf("%02d. %d스테이지 %d챕터 / 아이템 : %d개 단서 : %d개 \n", i + 1, stage, chapter, item, clue);
-						}
-						printf("선택 : ");
-						scanf_s("%d", &choice_save);
-						if (choice_save > 0 && choice_save < msg_int + 1) {
-							g_save_num = choice_save - 1;
-							send(sock, &g_save_num, sizeof(g_save_num), 0);
-							break;
+							printf("%d. %d챕터 %d스테이지 \n아이템 : %d개 \n단서 : %d개 \n \n", i + 1, chapter, stage, item, clue);
 						}
 
-						msg_int = 20;
-						system("cls");
-						printf("다시 선택해 주세요. \n");
-						system("pause");
+						printf("페이지 (1 ~ 5) : ");
+						scanf_s("%d", &msg_int);
+						i = 4 * (msg_int - 1);
+						if (msg_int < 1 || msg_int > 5) {
+							msg_int = 0;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							break;
+						}
 						send(sock, &msg_int, sizeof(msg_int), 0);
+					}
+
+					printf("선택 : ");
+					scanf_s("%d", &msg_int);
+					if (msg_int >= 1 && msg_int <= 20) {
+						msg_int--;
+						g_save_num = msg_int;
 					}
 
 					break;

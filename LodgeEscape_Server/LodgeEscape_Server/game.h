@@ -34,7 +34,6 @@ typedef struct room {
 } room_t;
 
 typedef struct save {
-	int player_num;
 	int item_num;
 	int clue_num;
 	int stage;

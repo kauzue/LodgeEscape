@@ -206,7 +206,6 @@ int Player0_Chapter0()
 				case INVESTIGATE_011: {
 					msg_int = 0;
 					send(sock, &msg_int, sizeof(msg_int), 0);
-					send(sock, &g_save_num, sizeof(g_save_num), 0);
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ÀÌ ÀÖ´Ù. \n \n");
 					printf("¼ÕÀüµî, Áö°©, ¼öÃ¸ È¹µæ \n");
@@ -318,7 +317,6 @@ int Player1_Chapter0()
 				case INVESTIGATE_011: {
 					msg_int = 0;
 					send(sock, &msg_int, sizeof(msg_int), 0);
-					send(sock, &g_save_num, sizeof(g_save_num), 0);
 					send(sock, &g_player_num, sizeof(g_player_num), 0);
 					printf("Áö°©°ú ¼öÃ¸ÀÌ ÀÖ´Ù. \n \n");
 					printf("Áö°©, ¼öÃ¸ È¹µæ \n");
@@ -420,8 +418,47 @@ int Menu_Game()
 				}
 
 				case SAVE: {
-					printf("Save is developing \n");
-					system("pause");
+					int chapter, stage, item, clue;
+					int i = 2;
+
+					send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+					while (true) {
+						system("cls");
+
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						for (i; i < msg_int; i++) {
+							recv(sock, &chapter, sizeof(chapter), 0);
+							recv(sock, &stage, sizeof(stage), 0);
+							recv(sock, &item, sizeof(item), 0);
+							recv(sock, &clue, sizeof(clue), 0);
+							printf("%d. %dÃ©ÅÍ %d½ºÅ×ÀÌÁö \n¾ÆÀÌÅÛ : %d°³ \n´Ü¼­ : %d°³ \n \n", i + 1, chapter, stage, item, clue);
+						}
+
+						printf("ÆäÀÌÁö (1 ~ 5) : ");
+						scanf_s("%d", &msg_int);
+						i = 4 * (msg_int - 1);
+						if (msg_int < 1 || msg_int > 5) {
+							msg_int = 0;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							break;
+						}
+						send(sock, &msg_int, sizeof(msg_int), 0);
+					}
+
+					printf("¼±ÅÃ : ");
+					scanf_s("%d", &msg_int);
+					if (msg_int >= 3 && msg_int <= 20) {
+						msg_int--;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+					}
+
+					else {
+						msg_int = 0;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						break;
+					}
+
 					break;
 				}
 
@@ -445,7 +482,6 @@ void Item()
 	int msg_int;
 	int item, item_num;
 
-	send(sock, &g_save_num, sizeof(g_save_num), 0);
 	send(sock, &g_player_num, sizeof(g_player_num), 0);
 	recv(sock, &item_num, sizeof(item_num), 0);
 	if (item_num == 0) {
