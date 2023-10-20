@@ -476,7 +476,8 @@ void Start_Game()
 								send(sock, &g_save_num, sizeof(g_save_num), 0);
 								recv(sock, &msg_int, sizeof(msg_int), 0);
 								if (msg_int == 0) {
-									printf("선택하신 챕터가 다릅니다. 이 방의 챕터와 다릅니다. 다시 시도해 주세요.");
+									printf("선택하신 챕터가 다릅니다. 이 방의 챕터와 다릅니다. 다시 시도해 주세요. \n");
+									system("pause");
 									return;
 								}
 								

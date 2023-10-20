@@ -8,7 +8,7 @@ enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
 enum Start_Game { CREATE_ROOM_START_GAME, FIND_ROOM_START_GAME, EXIT_START_GAME };
 enum Option { LOGIN_DATA_OPTION, LOGOUT_OPTION, EXIT_OPTION };
-enum Story { ITEM, MENU, CHAPTER, STAGE };
+enum Story { ITEM, MENU, CHAPTER, STAGE, ENDING };
 enum Menu { ITEM_MENU, SAVE_MENU, BACK_MENU, EXIT_MENU };
 enum Item {
 	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
@@ -364,7 +364,6 @@ EXIT_CREATE_ROOM:
 					recv(sock, &msg_int, sizeof(msg_int), 0);
 					s_rooms[room_num].player2_chapter = s_saves[s_rooms[room_num].player2][msg_int].chapter;
 					s_rooms[room_num].sock_server2 = sock;
-					g_rooms_num--;
 					break;
 				}
 			}
@@ -421,6 +420,7 @@ void Wait(int room_num)
 	else if(s_rooms[room_num].sock_server1 != s_rooms[room_num].sock_server2) {
 		msg_int = 1;
 		send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		g_rooms_num--;
 		InitStory();
 		return;
 	}
@@ -441,13 +441,18 @@ void InitStory()
 	int player_num;
 	int save_num;
 	int err;
+
+	recv(sock, &player_num, sizeof(player_num), 0);
+	send(sock, &s_players[player_num].player_num, sizeof(int), 0);
+	recv(sock, &save_num, sizeof(save_num), 0);
+
+	s_saves[player_num][1].chapter = s_saves[player_num][save_num].chapter;
+	s_saves[player_num][1].stage = s_saves[player_num][save_num].stage;
 	
 	while (true) {
-		recv(sock, &player_num, sizeof(player_num), 0);
-		send(sock, &s_players[player_num].player_num, sizeof(s_players[player_num].player_num), 0);
-		recv(sock, &save_num, sizeof(save_num), 0);
-		send(sock, &s_saves[player_num][save_num].chapter, sizeof(s_saves[player_num][save_num].chapter), 0);
-		send(sock, &s_saves[player_num][save_num].stage, sizeof(s_saves[player_num][save_num].stage), 0);
+
+		send(sock, &s_saves[player_num][1].chapter, sizeof(int), 0);
+		send(sock, &s_saves[player_num][1].stage, sizeof(int), 0);
 
 		err = Story();
 		if (err == -1) {
@@ -457,6 +462,22 @@ void InitStory()
 			while (true) {
 				if (s_rooms[room_num].exit_num == 2) {
 					send(sock, &room_num, sizeof(room_num), 0);
+
+					char save_filename[16];
+
+					for (int i = 0; i < NUM_MAX_PLAYER_PER_SAVES; i++) {
+						sprintf(save_filename, "save%02d.bin", i + 1);
+						FILE* sb = fopen(save_filename, "wb");
+						if (sb == NULL) {
+							puts("세이브 파일 오픈 실패!");
+							return;
+						}
+
+						fwrite(&s_saves, sizeof(save_t), NUM_MAX_PLAYERS, sb);
+
+						fclose(sb);
+					}
+
 					break;
 				}
 			}
@@ -494,12 +515,21 @@ int Story()
 
 		case CHAPTER: {
 			recv(sock, &player_num, sizeof(player_num), 0);
-			s_saves[player_num][1].stage++;
+			s_saves[player_num][1].stage = 0;
+			s_saves[player_num][1].chapter++;
+
+			return 0;
 		}
 
 		case STAGE: {
 			recv(sock, &player_num, sizeof(player_num), 0);
 			s_saves[player_num][1].stage++;
+			
+			return 0;
+		}
+
+		case ENDING: {
+			return -1;
 		}
 		}
 	}
@@ -645,13 +675,16 @@ void Save()
 		}
 
 		recv(sock, &save_num, sizeof(save_num), 0);
-		if (save_num == 0) {
+		i = 4 * (save_num - 1);
+		if (save_num == 1) {
+			i = 2;
+		}
+		else if (save_num == 0) {
 			break;
 		}
 	}
 
 	recv(sock, &save_num, sizeof(save_num), 0);
-	i = 4 * (save_num - 1);
 	if (save_num == 0) {
 		return;
 	}
