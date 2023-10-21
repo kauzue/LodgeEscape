@@ -10,6 +10,24 @@
 #define NUM_MAX_PLAYER_PER_ENDINGS 10
 #define NUM_MAX_SAVE_PER_ITEMS 10
 #define NUM_MAX_SAVE_PER_CLUES 10
+#define NUM_MAX_STORY 20
+
+typedef struct ending {
+	int number;
+} ending_t;
+
+typedef struct item {
+	int number;
+} item_t;
+
+typedef struct clue {
+	int number;
+} clue_t;
+
+typedef struct story {
+	int num_item;
+	int num_clue;
+} story_t;
 
 typedef struct player {
 	char ID[MAX_MSG_LEN];
@@ -17,6 +35,7 @@ typedef struct player {
 	int player_num;
 	int save_num;
 	int ending_num;
+	ending_t endings[NUM_MAX_PLAYER_PER_ENDINGS];
 } player_t;
 
 typedef struct room {
@@ -36,27 +55,16 @@ typedef struct room {
 typedef struct save {
 	int item_num;
 	int clue_num;
+	item_t items[NUM_MAX_SAVE_PER_ITEMS];
+	clue_t clues[NUM_MAX_SAVE_PER_CLUES];
+	story_t storys[NUM_MAX_STORY];
 	int stage;
 	int chapter;
 } save_t;
 
-typedef struct ending {
-	int number;
-} ending_t;
-
-typedef struct item { 
-	int number;
-} item_t;
-
-typedef struct clue {
-	int number;
-} clue_t;
-
 player_t s_players[NUM_MAX_PLAYERS];
 room_t s_rooms[NUM_MAX_ROOMS];
 save_t s_saves[NUM_MAX_PLAYERS][NUM_MAX_PLAYER_PER_SAVES];
-item_t s_items[NUM_MAX_PLAYER_PER_SAVES][NUM_MAX_SAVE_PER_ITEMS];
-ending_t s_endings[NUM_MAX_PLAYERS][NUM_MAX_PLAYER_PER_ENDINGS];
 
 bool InitSystem();
 void Game_Login(SOCKET);

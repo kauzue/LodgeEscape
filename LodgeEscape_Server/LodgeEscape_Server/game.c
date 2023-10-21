@@ -272,7 +272,7 @@ int Game_Main_Menu()
 			send(sock, &s_players[msg_int].ending_num, sizeof(s_players[msg_int].ending_num), 0);
 
 			for (int i = 0; i < s_players[msg_int].ending_num; i++) {
-				send(sock, s_endings[msg_int][i].number, sizeof(s_endings[msg_int][i].number), 0);
+				send(sock, &s_players[msg_int].endings[i].number, sizeof(int), 0);
 			}
 			break;
 		}
@@ -448,6 +448,20 @@ void InitStory()
 
 	s_saves[player_num][1].chapter = s_saves[player_num][save_num].chapter;
 	s_saves[player_num][1].stage = s_saves[player_num][save_num].stage;
+	s_saves[player_num][1].item_num = s_saves[player_num][save_num].item_num;
+	for (int i = 0; i < NUM_MAX_STORY; i++) {
+		s_saves[player_num][1].storys[i].num_item = s_saves[player_num][save_num].storys[i].num_item;
+	}
+	for (int i = 0; i < NUM_MAX_SAVE_PER_ITEMS; i++) {
+		s_saves[player_num][1].items[i].number = s_saves[player_num][save_num].items[i].number;
+	}
+	s_saves[player_num][1].clue_num = s_saves[player_num][save_num].clue_num;
+	for (int i = 0; i < NUM_MAX_STORY; i++) {
+		s_saves[player_num][1].storys[i].num_clue = s_saves[player_num][save_num].storys[i].num_clue;
+	}
+	for (int i = 0; i < NUM_MAX_SAVE_PER_CLUES; i++) {
+		s_saves[player_num][1].clues[i].number = s_saves[player_num][save_num].clues[i].number;
+	}
 	
 	while (true) {
 
@@ -498,10 +512,20 @@ int Story()
 		case ITEM: {
 			recv(sock, &player_num, sizeof(player_num), 0);
 			recv(sock, &msg_int, sizeof(msg_int), 0);
+			send(sock, &s_saves[player_num][1].storys[msg_int].num_item, sizeof(int), 0);
+			if (s_saves[player_num][1].storys[msg_int].num_item == 1) {
+				break;
+			}
+			s_saves[player_num][1].storys[msg_int].num_item = 1;
+
+			recv(sock, &msg_int, sizeof(msg_int), 0);
+
 			for (int i = 0; i < msg_int; i++) {
-				recv(sock, &s_items[1][s_saves[player_num][1].item_num].number, sizeof(int), 0);
+				recv(sock, &s_saves[player_num][1].items[s_saves[player_num][1].item_num].number, sizeof(int), 0);
 				s_saves[player_num][1].item_num++;
 			}
+
+
 			break;
 		}
 
@@ -569,18 +593,31 @@ int Menu()
 void Item()
 {
 	int msg_int;
+	int item_num = 1;
 	int player_num;
+	int i = 0;
 
 	recv(sock, &player_num, sizeof(player_num), 0);
 	send(sock, &s_saves[player_num][1].item_num, sizeof(int), 0);
-	if (s_saves[player_num][1].item_num == 0) {
-		return;
-	}
 
-	for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-		send(sock, &s_items[1][i].number, sizeof(s_items[1][i].number), 0);
-	}
+	while (true) {
+		item_num = s_saves[player_num][1].item_num / 5 * item_num;
 
+		send(sock, &item_num, sizeof(item_num), 0);
+		for (i; i < item_num; i++) {
+			if (s_saves[player_num][1].item_num == 0) {
+				return;
+			}
+
+			send(sock, &s_saves[player_num][1].items[i].number, sizeof(int), 0);
+		}
+
+		recv(sock, &item_num, sizeof(item_num), 0);
+		i = 4 * (item_num - 1);
+		if (item_num == 0) {
+			break;
+		}
+	}
 	recv(sock, &msg_int, sizeof(msg_int), 0);
 
 	switch (msg_int) {
@@ -590,8 +627,8 @@ void Item()
 
 	case FLASH_BATTERY: {
 		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_items[1][i].number == msg_int) {
-				s_items[1][i].number = 12;
+			if (s_saves[player_num][1].items[i].number == msg_int) {
+				s_saves[player_num][1].items[i].number = 12;
 				break;
 			}
 		}
@@ -600,8 +637,8 @@ void Item()
 
 	case FLASH_LIGHT: {
 		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_items[1][i].number == msg_int) {
-				s_items[1][i].number = 11;
+			if (s_saves[player_num][1].items[i].number == msg_int) {
+				s_saves[player_num][1].items[i].number = 11;
 				break;
 			}
 		}
@@ -610,15 +647,15 @@ void Item()
 
 	case WALLET_1: {
 		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_items[1][i].number == msg_int) {
-				s_items[1][i].number = 21;
+			if (s_saves[player_num][1].items[i].number == msg_int) {
+				s_saves[player_num][1].items[i].number = 21;
 				break;
 			}
 		}
 
-		s_items[1][s_saves[player_num][1].item_num].number = 30;
+		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 30;
 		s_saves[player_num][1].item_num++;
-		s_items[1][s_saves[player_num][1].item_num].number = 40;
+		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 40;
 		s_saves[player_num][1].item_num++;
 		break;
 	}
@@ -629,15 +666,15 @@ void Item()
 
 	case WALLET_2: {
 		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_items[1][i].number == msg_int) {
-				s_items[1][i].number = 100011;
+			if (s_saves[player_num][1].items[i].number == msg_int) {
+				s_saves[player_num][1].items[i].number = 100011;
 				break;
 			}
 		}
 
-		s_items[1][s_saves[player_num][1].item_num].number = 100020;
+		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 100020;
 		s_saves[player_num][1].item_num++;
-		s_items[1][s_saves[player_num][1].item_num].number = 100030;
+		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 100030;
 		s_saves[player_num][1].item_num++;
 		break;
 	}
@@ -661,7 +698,6 @@ void Save()
 	int save_num = 1;
 
 	recv(sock, &player_num, sizeof(player_num), 0);
-
 
 	while (true) {
 		save_num = NUM_MAX_PLAYER_PER_SAVES / 5 * save_num;
@@ -692,7 +728,19 @@ void Save()
 	s_saves[player_num][save_num].chapter = s_saves[player_num][1].chapter;
 	s_saves[player_num][save_num].stage = s_saves[player_num][1].stage;
 	s_saves[player_num][save_num].item_num = s_saves[player_num][1].item_num;
+	for (int i = 0; i < NUM_MAX_SAVE_PER_ITEMS; i++) {
+		s_saves[player_num][save_num].items[i].number = s_saves[player_num][1].items[i].number;
+	}
+	for (int i = 0; i < NUM_MAX_STORY; i++) {
+		s_saves[player_num][save_num].storys[i].num_item = s_saves[player_num][1].storys[i].num_item;
+	}
 	s_saves[player_num][save_num].clue_num = s_saves[player_num][1].clue_num;
+	for (int i = 0; i < NUM_MAX_SAVE_PER_CLUES; i++) {
+		s_saves[player_num][save_num].clues[i].number = s_saves[player_num][1].clues[i].number;
+	}
+	for (int i = 0; i < NUM_MAX_STORY; i++) {
+		s_saves[player_num][save_num].storys[i].num_clue = s_saves[player_num][1].storys[i].num_clue;
+	}
 
 	return;
 }

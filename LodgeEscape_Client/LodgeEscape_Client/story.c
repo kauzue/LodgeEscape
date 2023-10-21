@@ -282,27 +282,42 @@ int Menu_Game()
 void Item()
 {
 	int msg_int;
-	int item, item_num;
+	int item, item_num, max_item;
+	int i = 0;
 
 	send(sock, &g_player_num, sizeof(g_player_num), 0);
-	recv(sock, &item_num, sizeof(item_num), 0);
-	if (item_num == 0) {
-		printf("현재 가진 아이템이 없습니다. \n");
-		system("pause");
-		return;
-	}
+	recv(sock, &max_item, sizeof(max_item), 0);
 
-	for (int i = 0; i < item_num; i++) {
-		recv(sock, &item, sizeof(item), 0);
-		printf("%d. %s \n", item, s_items[item].name);
-		printf("%s \n", s_items[item].explaination);
-		if (s_items[item].use == true) {
-			printf("사용 가능 \n \n");
+	while (true) {
+		recv(sock, &item_num, sizeof(item_num), 0);
+		for (i; i < item_num; i++) {
+			if (item_num == 0) {
+				printf("현재 가진 아이템이 없습니다. \n");
+				system("pause");
+				return;
+			}
+
+			recv(sock, &item, sizeof(item), 0);
+			printf("%d. %s \n", item, s_items[item].name);
+			printf("%s \n", s_items[item].explaination);
+			if (s_items[item].use == true) {
+				printf("사용 가능 \n \n");
+			}
+
+			else {
+				printf("\n");
+			}
 		}
 
-		else {
-			printf("\n");
+		printf("페이지 (1 ~ %d) : ", max_item / 5);
+		scanf_s("%d", &msg_int);
+		i = 4 * (msg_int - 1);
+		if (msg_int < 1 || msg_int > max_item) {
+			msg_int = 0;
+			send(sock, &msg_int, sizeof(msg_int), 0);
+			break;
 		}
+		send(sock, &msg_int, sizeof(msg_int), 0);
 	}
 
 	printf("선택 : ");
@@ -446,11 +461,13 @@ int Player0_Chapter0(int stage)
 						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
 						printf("손전등, 지갑, 수첩이 있다. \n \n");
 						printf("손전등, 지갑, 수첩 획득 \n");
 						system("pause");
 						investigate++;
-						if (investigate == 1) {
+						if (msg_int != 1) {
 							msg_int = 3;
 							send(sock, &msg_int, sizeof(msg_int), 0);
 							msg_int = 10;
@@ -458,11 +475,6 @@ int Player0_Chapter0(int stage)
 							msg_int = 20;
 							send(sock, &msg_int, sizeof(msg_int), 0);
 							msg_int = 50;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-						}
-
-						else {
-							msg_int = 0;
 							send(sock, &msg_int, sizeof(msg_int), 0);
 						}
 						break;
@@ -588,20 +600,17 @@ int Player1_Chapter0(int stage)
 						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
 						printf("지갑과 수첩이 있다. \n \n");
 						printf("지갑, 수첩 획득 \n");
 						investigate++;
-						if (investigate == 1) {
+						if (msg_int != 1) {
 							msg_int = 2;
 							send(sock, &msg_int, sizeof(msg_int), 0);
 							msg_int = 100010;
 							send(sock, &msg_int, sizeof(msg_int), 0);
 							msg_int = 100040;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-						}
-
-						else {
-							msg_int = 0;
 							send(sock, &msg_int, sizeof(msg_int), 0);
 						}
 						system("pause");
