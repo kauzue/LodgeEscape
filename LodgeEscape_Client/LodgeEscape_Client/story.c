@@ -282,21 +282,26 @@ int Menu_Game()
 void Item()
 {
 	int msg_int;
-	int item, item_num, max_item;
+	int item, item_num, max_item, max_page;
 	int i = 0;
 
 	send(sock, &g_player_num, sizeof(g_player_num), 0);
 	recv(sock, &max_item, sizeof(max_item), 0);
+	if (max_item == 0) {
+		printf("현재 가진 아이템이 없습니다. \n");
+		system("pause");
+		return;
+	}
+
+	max_page = max_item / 4 + 1;
+	if (max_item % 4 == 0) {
+		max_page -= 1;
+	}
 
 	while (true) {
+		system("cls");
 		recv(sock, &item_num, sizeof(item_num), 0);
 		for (i; i < item_num; i++) {
-			if (item_num == 0) {
-				printf("현재 가진 아이템이 없습니다. \n");
-				system("pause");
-				return;
-			}
-
 			recv(sock, &item, sizeof(item), 0);
 			printf("%d. %s \n", item, s_items[item].name);
 			printf("%s \n", s_items[item].explaination);
@@ -309,20 +314,21 @@ void Item()
 			}
 		}
 
-		printf("페이지 (1 ~ %d) : ", max_item / 5);
+		printf("페이지 (1 ~ %d) : ", max_page);
 		scanf_s("%d", &msg_int);
 		i = 4 * (msg_int - 1);
-		if (msg_int < 1 || msg_int > max_item) {
-			msg_int = 0;
+		if (msg_int < 1 || msg_int > max_page) {
+			msg_int = -1;
 			send(sock, &msg_int, sizeof(msg_int), 0);
 			break;
 		}
-		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &i, sizeof(i), 0);
 	}
 
 	printf("선택 : ");
 	scanf_s("%d", &msg_int);
 	send(sock, &msg_int, sizeof(msg_int), 0);
+	recv(sock, &msg_int, sizeof(msg_int), 0);
 	system("cls");
 
 	switch (msg_int) {

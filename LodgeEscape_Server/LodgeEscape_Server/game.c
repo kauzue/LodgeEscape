@@ -1,6 +1,7 @@
 #pragma warning(disable:4996)
 
 #include <stdio.h>
+#include <math.h>
 
 #include "game.h"
 
@@ -407,7 +408,7 @@ int Option()
 	}
 	}
 }
-
+ 
 void Wait(int room_num)
 {
 	int msg_int = 0;
@@ -599,60 +600,57 @@ void Item()
 
 	recv(sock, &player_num, sizeof(player_num), 0);
 	send(sock, &s_saves[player_num][1].item_num, sizeof(int), 0);
+	if (s_saves[player_num][1].item_num == 0) {
+		return;
+	}
 
 	while (true) {
-		item_num = s_saves[player_num][1].item_num / 5 * item_num;
+		item_num = 4 * (i + 1);
+		if (item_num > s_saves[player_num][1].item_num) {
+			item_num = s_saves[player_num][1].item_num;
+		}
 
 		send(sock, &item_num, sizeof(item_num), 0);
 		for (i; i < item_num; i++) {
-			if (s_saves[player_num][1].item_num == 0) {
-				return;
-			}
 
 			send(sock, &s_saves[player_num][1].items[i].number, sizeof(int), 0);
 		}
 
-		recv(sock, &item_num, sizeof(item_num), 0);
-		i = 4 * (item_num - 1);
-		if (item_num == 0) {
+		recv(sock, &i, sizeof(i), 0);
+		if (i == -1) {
 			break;
 		}
 	}
 	recv(sock, &msg_int, sizeof(msg_int), 0);
+	while (true) {
+		for (i = 0; i < s_saves[player_num][1].item_num; i++) {
+			if (s_saves[player_num][1].items[i].number == msg_int) {
+				goto EXIT_FOR;
+			}
+		}
+		msg_int = -1;
+		break;
+	}
 
+EXIT_FOR:
+	send(sock, &msg_int, sizeof(msg_int), 0);
 	switch (msg_int) {
 	case FLASH: {
 		break;
 	}
 
 	case FLASH_BATTERY: {
-		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_saves[player_num][1].items[i].number == msg_int) {
-				s_saves[player_num][1].items[i].number = 12;
-				break;
-			}
-		}
+		s_saves[player_num][1].items[i].number = 12;
 		break;
 	}
 
 	case FLASH_LIGHT: {
-		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_saves[player_num][1].items[i].number == msg_int) {
-				s_saves[player_num][1].items[i].number = 11;
-				break;
-			}
-		}
+		s_saves[player_num][1].items[i].number = 11;
 		break;
 	}
 
 	case WALLET_1: {
-		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_saves[player_num][1].items[i].number == msg_int) {
-				s_saves[player_num][1].items[i].number = 21;
-				break;
-			}
-		}
-
+		s_saves[player_num][1].items[i].number = 21;
 		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 30;
 		s_saves[player_num][1].item_num++;
 		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 40;
@@ -665,13 +663,7 @@ void Item()
 	}
 
 	case WALLET_2: {
-		for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
-			if (s_saves[player_num][1].items[i].number == msg_int) {
-				s_saves[player_num][1].items[i].number = 100011;
-				break;
-			}
-		}
-
+		s_saves[player_num][1].items[i].number = 100011;
 		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 100020;
 		s_saves[player_num][1].item_num++;
 		s_saves[player_num][1].items[s_saves[player_num][1].item_num].number = 100030;
