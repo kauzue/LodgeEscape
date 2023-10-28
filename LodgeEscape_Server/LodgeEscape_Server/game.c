@@ -9,7 +9,8 @@ enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
 enum Start_Game { CREATE_ROOM_START_GAME, FIND_ROOM_START_GAME, EXIT_START_GAME };
 enum Option { LOGIN_DATA_OPTION, LOGOUT_OPTION, EXIT_OPTION };
-enum Story { ITEM, MENU, CHAPTER, STAGE, ENDING };
+enum Story { ITEM, MENU, CHAPTER, STAGE, ENDING, ACT };
+enum Act { WATER, BOOK };
 enum Menu { ITEM_MENU, SAVE_MENU, BACK_MENU, EXIT_MENU };
 enum Item {
 	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
@@ -555,6 +556,47 @@ int Story()
 
 		case ENDING: {
 			return -1;
+		}
+
+		case ACT: {
+			recv(sock, &msg_int, sizeof(msg_int), 0);
+
+			switch (msg_int) {
+			case WATER: {
+				recv(sock, &msg_int, sizeof(msg_int), 0);
+				recv(sock, &player_num, sizeof(player_num), 0);
+
+				switch (msg_int) {
+				case 0: {
+					send(sock, &s_players[player_num].water_num, sizeof(int), 0);
+					break;
+				}
+
+				case 1: {
+					s_players[player_num].water_num++;
+					break;
+				}
+				}
+				break;
+			}
+
+			case BOOK: {
+				recv(sock, &msg_int, sizeof(msg_int), 0);
+				recv(sock, &player_num, sizeof(player_num), 0);
+
+				switch (msg_int) {
+				case 0: {
+					send(sock, &s_players[player_num].book_num, sizeof(int), 0);
+					break;
+				}
+
+				case 1: {
+					s_players[player_num].book_num++;
+					break;
+				}
+				}
+			}
+			}
 		}
 		}
 	}

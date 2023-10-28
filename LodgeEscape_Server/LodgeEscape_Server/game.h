@@ -35,6 +35,8 @@ typedef struct player {
 	int player_num;
 	int save_num;
 	int ending_num;
+	int water_num;
+	int book_num;
 	ending_t endings[NUM_MAX_PLAYER_PER_ENDINGS];
 } player_t;
 

@@ -13,8 +13,9 @@ int end = 0;
 
 enum Chapter { CHAPTER0, CHAPTER1, CHAPTER2, CHAPTER3, CHAPTER4 };
 enum Stage { STAGE1, STAGE2, STAGE3, STAGE4 };
-enum _011 { EXPLORE_011, INVESTIGATE_011, MENU_011 };
-enum _111 { EXPLORE_111, INVESTIGATE_111, MENU_111 };
+enum _001 { EXPLORE_001, INVESTIGATE_001, MENU_001 };
+enum _002 { EXPLORE_ROOM_1_002, EXPLORE_ROOM_2_002, EXPLORE_ROOM_3_002, EXPLORE_ROOM_4_002, MENU_002 };
+enum _101 { EXPLORE_101, INVESTIGATE_101, MENU_101 };
 enum Menu { ITEM, SAVE, BACK, EXIT };
 enum Item {
 	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
@@ -23,11 +24,13 @@ enum Item {
 
 void Player0();
 void Player1();
-int Player0_Chapter0(int);
-int Player1_Chapter0(int);
 int Menu_Game();
 void Item();
 void Exit_Game();
+int Player0_Chapter0(int);
+int Player0_Chapter1(int);
+int Player1_Chapter0(int);
+int Player1_Chapter1(int);
 
 void InitStory(SOCKET socket, int player_num, int save_num, int room_num)
 {
@@ -77,6 +80,7 @@ void Player0()
 			break;
 		}
 		case CHAPTER1: {
+			exit = Player0_Chapter1(stage_number);
 			break;
 		}
 
@@ -126,6 +130,7 @@ void Player1()
 		}
 
 		case CHAPTER1: {
+			exit = Player1_Chapter1(stage_number);
 			break;
 		}
 
@@ -399,12 +404,13 @@ int Player0_Chapter0(int stage)
 	int x, y;
 	int key;
 	int msg_int;
-	int explore = 0;
-	int investigate = 0;
 	int exit = 0;
 
 	switch (stage) {
 	case STAGE1: {
+		int explore = 0;
+		int investigate = 0;
+
 		while (explore == 0 || investigate == 0) {
 			key = 0;
 			x = 2;
@@ -455,15 +461,15 @@ int Player0_Chapter0(int stage)
 					system("cls");
 
 					switch (y) {
-					case EXPLORE_011: {
-						printf("불이 약간 들어오는 전구와 전화기가 보이고 아무런 소리도 들리지 않는다. \n");
-						printf("문 3개가 보인다. \n");
+					case EXPLORE_001: {
+						printf("불이 약간 들어오는 전구가 보이고 아무런 소리도 들리지 않는다. \n");
+						printf("문 4개가 보인다. \n");
 						system("pause");
 						explore++;
 						break;
 					}
 
-					case INVESTIGATE_011: {
+					case INVESTIGATE_001: {
 						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						send(sock, &g_player_num, sizeof(g_player_num), 0);
@@ -486,7 +492,7 @@ int Player0_Chapter0(int stage)
 						break;
 					}
 
-					case MENU_011: {
+					case MENU_001: {
 						msg_int = 1;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						exit = Menu_Game();
@@ -506,6 +512,93 @@ int Player0_Chapter0(int stage)
 	}
 
 	case STAGE2: {
+		int t = 0;
+		int tem = 0;
+		while (t == 0 || tem == 0) {
+			key = 0;
+			x = 2;
+			y = 2;
+
+			system("cls");
+
+			printf("이 방에는 불이 약간 들어오는 전구와 문 4개가 보인다. \n");
+
+			MoveCursor(x - 2, y);
+			printf("> 방 1 조사");
+
+			MoveCursor(x, y + 2);
+			printf("방 2 조사");
+
+			MoveCursor(x, y + 4);
+			printf("방 3 조사");
+
+			MoveCursor(x, y + 6);
+			printf("방 4 조사");
+
+			while (key != 4) {
+				key = ControlKey();
+
+				switch (key) {
+				case UP: {
+					if (y > 2) {
+						MoveCursor(x - 2, y);
+						printf(" ");
+						MoveCursor(x - 2, y -= 2);
+						printf(">");
+					}
+					break;
+				}
+
+				case DOWN: {
+					if (y < 8) {
+						MoveCursor(x - 2, y);
+						printf(" ");
+
+						MoveCursor(x - 2, y += 2);
+						printf(">");
+					}
+					break;
+				}
+
+				case ENTER: {
+					y = y / 2 - 2;
+					system("cls");
+
+					switch (y) {
+					case EXPLORE_ROOM_1_002: {
+						msg_int = 5;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						msg_int = 0;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						printf("화장실이다. 물은 나오지 않는 것 같다. \n");
+						system("pause");
+					}
+
+					case EXPLORE_ROOM_2_002: {
+						printf("문이 잠겨있습니다. \n");
+						system("pause");
+					}
+
+					case EXPLORE_ROOM_3_002: {
+						printf("문이 잠겨있습니다. \n");
+						system("pause");
+					}
+
+					case EXPLORE_ROOM_4_002: {
+						printf("문이 잠겨있습니다. \n");
+						system("pause");
+					}
+
+					case MENU_002: {
+
+					}
+					}
+				}
+				}
+			}
+		}
 		break;
 	}
 
@@ -533,17 +626,23 @@ int Player0_Chapter0(int stage)
 	return 0;
 }
 
+int Player0_Chapter1(int stage)
+{
+	return;
+}
+
 int Player1_Chapter0(int stage)
 {
 	int x, y;
 	int key;
 	int msg_int;
-	int explore = 0;
-	int investigate = 0;
 	int exit = 0;
 
 	switch (stage) {
 	case STAGE1: {
+		int explore = 0;
+		int investigate = 0;
+
 		while (explore == 0 || investigate == 0) {
 			key = 0;
 			x = 2;
@@ -593,16 +692,16 @@ int Player1_Chapter0(int stage)
 					system("cls");
 
 					switch (y) {
-					case EXPLORE_011: {
+					case EXPLORE_101: {
 						printf("촛불만이 여관을 비추고 있다. \n");
 						printf("밖에는 어둡고 비가 오고 있으며 창문과 출입구는 모두 잠겨있어 나가기는 어려울 것 같다. \n");
-						printf("안에는 전화기와 다른 방으로 연결된 문들이 5개가 보인다. \n");
+						printf("안에는 책장 하나와 간이 주방과 다른 방으로 연결된 문들이 3개가 보인다. \n");
 						system("pause");
 						explore++;
 						break;
 					}
 
-					case INVESTIGATE_011: {
+					case INVESTIGATE_101: {
 						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						send(sock, &g_player_num, sizeof(g_player_num), 0);
@@ -623,7 +722,7 @@ int Player1_Chapter0(int stage)
 						break;
 					}
 
-					case MENU_011: {
+					case MENU_101: {
 						msg_int = 1;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						exit = Menu_Game();
@@ -669,4 +768,9 @@ int Player1_Chapter0(int stage)
 	send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 	return 0;
+}
+
+int Player1_Chapter1(int stage)
+{
+
 }
