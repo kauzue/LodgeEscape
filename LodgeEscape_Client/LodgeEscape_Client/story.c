@@ -13,13 +13,20 @@ int end = 0;
 
 enum Chapter { CHAPTER0, CHAPTER1, CHAPTER2, CHAPTER3, CHAPTER4 };
 enum Stage { STAGE1, STAGE2, STAGE3, STAGE4 };
-enum _001 { EXPLORE_001, INVESTIGATE_001, MENU_001 };
-enum _002 { EXPLORE_ROOM_1_002, EXPLORE_ROOM_2_002, EXPLORE_ROOM_3_002, EXPLORE_ROOM_4_002, MENU_002 };
-enum _101 { EXPLORE_101, INVESTIGATE_101, MENU_101 };
+enum _001 { EXPLORE_001, INVESTIGATE_001, NEXTSTAGE_001, MENU_001 };
+enum _002 {
+	EXPLORE_ROOM_1_002, EXPLORE_ROOM_2_002, EXPLORE_ROOM_3_002, EXPLORE_ROOM_4_002, NEXTSTAGE_002,
+	BACKSTAGE_002, MENU_002
+};
+enum _101 { EXPLORE_101, INVESTIGATE_101, NEXTSTAGE_101, MENU_101 };
+enum _102 {
+	EXPLORE_ROOM_1_102, EXPLORE_ROOM_2_102, EXPLORE_ROOM_3_102, EXPLORE_BOOKSHELF_102, EXPLORE_KITCHEN_102,
+	BACKSTAGE_102, MENU_102
+};
 enum Menu { ITEM, SAVE, BACK, EXIT };
 enum Item {
 	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
-	NOTE_2 = 100040
+	NOTE_2 = 100040, KNIFE = 100050, DRY_DISHCLOTH = 100060, WET_DISHCLOTH = 100061
 };
 
 void Player0();
@@ -379,6 +386,24 @@ void Item()
 		break;
 	}
 
+	case KNIFE: {
+		printf("이 아이템은 사용할 수 없습니다.");
+		system("pause");
+		break;
+	}
+
+	case DRY_DISHCLOTH: {
+		printf("이 아이템은 사용할 수 없습니다.");
+		system("pause");
+		break;
+	}
+
+	case WET_DISHCLOTH: {
+		printf("이 아이템은 사용할 수 없습니다.");
+		system("pause");
+		break;
+	}
+
 	default: {
 		printf("이 아이템은 사용할 수 없거나 지니고 있지 않습니다. \n");
 		system("pause");
@@ -408,10 +433,8 @@ int Player0_Chapter0(int stage)
 
 	switch (stage) {
 	case STAGE1: {
-		int explore = 0;
-		int investigate = 0;
 
-		while (explore == 0 || investigate == 0) {
+		while (true) {
 			key = 0;
 			x = 2;
 			y = 4;
@@ -429,6 +452,9 @@ int Player0_Chapter0(int stage)
 			printf("몸 수색");
 
 			MoveCursor(x, y + 4);
+			printf("다음 스테이지");
+
+			MoveCursor(x, y + 6);
 			printf("메뉴");
 
 			while (key != 4) {
@@ -446,7 +472,7 @@ int Player0_Chapter0(int stage)
 				}
 
 				case DOWN: {
-					if (y < 8) {
+					if (y < 10) {
 						MoveCursor(x - 2, y);
 						printf(" ");
 
@@ -465,7 +491,6 @@ int Player0_Chapter0(int stage)
 						printf("불이 약간 들어오는 전구가 보이고 아무런 소리도 들리지 않는다. \n");
 						printf("문 4개가 보인다. \n");
 						system("pause");
-						explore++;
 						break;
 					}
 
@@ -478,7 +503,6 @@ int Player0_Chapter0(int stage)
 						printf("손전등, 지갑, 수첩이 있다. \n \n");
 						printf("손전등, 지갑, 수첩 획득 \n");
 						system("pause");
-						investigate++;
 						if (msg_int != 1) {
 							msg_int = 3;
 							send(sock, &msg_int, sizeof(msg_int), 0);
@@ -490,6 +514,14 @@ int Player0_Chapter0(int stage)
 							send(sock, &msg_int, sizeof(msg_int), 0);
 						}
 						break;
+					}
+
+					case NEXTSTAGE_001: {
+						int msg_int = 3;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+						return 0;
 					}
 
 					case MENU_001: {
@@ -514,7 +546,7 @@ int Player0_Chapter0(int stage)
 	case STAGE2: {
 		int t = 0;
 		int tem = 0;
-		while (t == 0 || tem == 0) {
+		while (true) {
 			key = 0;
 			x = 2;
 			y = 2;
@@ -535,6 +567,15 @@ int Player0_Chapter0(int stage)
 			MoveCursor(x, y + 6);
 			printf("방 4 조사");
 
+			MoveCursor(x, y + 8);
+			printf("다음 스테이지");
+
+			MoveCursor(x, y + 10);
+			printf("이전 스테이지");
+
+			MoveCursor(x, y + 12);
+			printf("메뉴");
+
 			while (key != 4) {
 				key = ControlKey();
 
@@ -550,7 +591,7 @@ int Player0_Chapter0(int stage)
 				}
 
 				case DOWN: {
-					if (y < 8) {
+					if (y < 14) {
 						MoveCursor(x - 2, y);
 						printf(" ");
 
@@ -561,7 +602,7 @@ int Player0_Chapter0(int stage)
 				}
 
 				case ENTER: {
-					y = y / 2 - 2;
+					y = y / 2 - 1;
 					system("cls");
 
 					switch (y) {
@@ -571,28 +612,81 @@ int Player0_Chapter0(int stage)
 						msg_int = 0;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						send(sock, &msg_int, sizeof(msg_int), 0);
-						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						send(sock, &g_room_num, sizeof(g_room_num), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						if (msg_int >= 1) {
+							msg_int = 7;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							send(sock, &g_player_num, sizeof(g_player_num), 0);
+							msg_int = 60;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							recv(sock, &msg_int, sizeof(msg_int), 0);
+							if (msg_int != 1) {
+								printf("방 열쇠를 얻었다.");
+
+								msg_int = 0;
+								send(sock, &msg_int, sizeof(msg_int), 0);
+								send(sock, &g_player_num, sizeof(g_player_num), 0);
+								msg_int = 1;
+								send(sock, &msg_int, sizeof(msg_int), 0);
+								recv(sock, &msg_int, sizeof(msg_int), 0);
+								printf("방 열쇠 획득 \n");
+								system("pause");
+								if (msg_int != 1) {
+									msg_int = 1;
+									send(sock, &msg_int, sizeof(msg_int), 0);
+									msg_int = 60;
+									send(sock, &msg_int, sizeof(msg_int), 0);
+								}
+							}
+						}
 						printf("화장실이다. 물은 나오지 않는 것 같다. \n");
 						system("pause");
+						break;
 					}
 
 					case EXPLORE_ROOM_2_002: {
 						printf("문이 잠겨있습니다. \n");
 						system("pause");
+						break;
 					}
 
 					case EXPLORE_ROOM_3_002: {
 						printf("문이 잠겨있습니다. \n");
 						system("pause");
+						break;
 					}
 
 					case EXPLORE_ROOM_4_002: {
 						printf("문이 잠겨있습니다. \n");
 						system("pause");
+						break;
+					}
+
+					case NEXTSTAGE_002: {
+						int msg_int = 3;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+						return 0;
+					}
+
+					case BACKSTAGE_002: {
+						int msg_int = 6;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+						return 0;
 					}
 
 					case MENU_002: {
-
+						msg_int = 1;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						exit = Menu_Game();
+						if (exit == -1) {
+							return -1;
+						}
+						break;
 					}
 					}
 				}
@@ -603,7 +697,15 @@ int Player0_Chapter0(int stage)
 	}
 
 	case STAGE3: {
-		break;
+		system("cls");
+		printf("성공");
+		system("pause");
+
+		int msg_int = 6;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+		return 0;
 	}
 
 	case STAGE4: {
@@ -611,17 +713,6 @@ int Player0_Chapter0(int stage)
 	}
 
 	}
-
-	if (stage == MAX_STAGE) {
-		msg_int = 2;
-	}
-
-	else {
-		msg_int = 3;
-	}
-
-	send(sock, &msg_int, sizeof(msg_int), 0);
-	send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 	return 0;
 }
@@ -643,7 +734,7 @@ int Player1_Chapter0(int stage)
 		int explore = 0;
 		int investigate = 0;
 
-		while (explore == 0 || investigate == 0) {
+		while (true) {
 			key = 0;
 			x = 2;
 			y = 4;
@@ -660,6 +751,9 @@ int Player1_Chapter0(int stage)
 			printf("몸 수색");
 
 			MoveCursor(x, y + 4);
+			printf("다음 스테이지");
+
+			MoveCursor(x, y + 6);
 			printf("메뉴");
 
 			while (key != 4) {
@@ -677,7 +771,7 @@ int Player1_Chapter0(int stage)
 				}
 
 				case DOWN: {
-					if (y < 8) {
+					if (y < 10) {
 						MoveCursor(x - 2, y);
 						printf(" ");
 
@@ -722,6 +816,14 @@ int Player1_Chapter0(int stage)
 						break;
 					}
 
+					case NEXTSTAGE_101: {
+						int msg_int = 3;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+						return 0;
+					}
+
 					case MENU_101: {
 						msg_int = 1;
 						send(sock, &msg_int, sizeof(msg_int), 0);
@@ -742,11 +844,189 @@ int Player1_Chapter0(int stage)
 	}
 
 	case STAGE2: {
+		int choice;
+		while (true) {
+			key = 0;
+			x = 2;
+			y = 2;
+
+			system("cls");
+
+			printf("이곳에는 가운데에 있는 촛불로 빛이 밝혀지고 있고 책장과 주방과 방 3개가 보인다. \n");
+
+			MoveCursor(x - 2, y);
+			printf("> 방 1 조사");
+
+			MoveCursor(x, y + 2);
+			printf("방 2 조사");
+
+			MoveCursor(x, y + 4);
+			printf("방 3 조사");
+
+			MoveCursor(x, y + 6);
+			printf("책장 조사");
+
+			MoveCursor(x, y + 8);
+			printf("주방 조사");
+
+			MoveCursor(x, y + 10);
+			printf("이전 스테이지");
+
+			MoveCursor(x, y + 12);
+			printf("메뉴");
+
+			while (key != 4) {
+				key = ControlKey();
+
+				switch (key) {
+				case UP: {
+					if (y > 2) {
+						MoveCursor(x - 2, y);
+						printf(" ");
+						MoveCursor(x - 2, y -= 2);
+						printf(">");
+					}
+					break;
+				}
+
+				case DOWN: {
+					if (y < 14) {
+						MoveCursor(x - 2, y);
+						printf(" ");
+
+						MoveCursor(x - 2, y += 2);
+						printf(">");
+					}
+					break;
+				}
+
+				case ENTER: {
+					y = y / 2 - 1;
+					system("cls");
+
+					switch (y) {
+					case EXPLORE_ROOM_1_102: {
+						printf("화장실이다. \n");
+						msg_int = 7;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						msg_int = 100060;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						if (msg_int == 1) {
+							printf("마른 행주에 물을 묻혔다. \n");
+							system("pause");
+							msg_int = 8;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							send(sock, &g_player_num, sizeof(g_player_num), 0);
+							msg_int = 100060;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+						}
+
+						printf("세면대의 물을 내릴 수 있을 것 같다. \n \n");
+
+						printf("세면대의 물을 내리시겠습니까? (1/0) \n");
+						scanf_s("%d", &choice);
+						if (choice == 1) {
+							msg_int = 5;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							msg_int = 0;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							send(sock, &g_room_num, sizeof(g_room_num), 0);
+							send(sock, &choice, sizeof(choice), 0);
+
+							system("cls");
+							printf("물을 내렸다.");
+							system("pause");
+						}
+
+						break;
+					}
+
+					case EXPLORE_ROOM_2_102: {
+						printf("문이 잠겨있습니다. \n");
+						system("pause");
+						break;
+					}
+
+					case EXPLORE_ROOM_3_102: {
+						printf("문이 열려있다. \n \n");
+
+						printf("들어가시겠습니까? (1/0) \n");
+						scanf_s("%d", &choice);
+						if (choice == 1) {
+							int msg_int = 3;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+							return 0;
+						}
+						break;
+					}
+
+					case EXPLORE_BOOKSHELF_102: {
+						printf("문이 잠겨있습니다. \n");
+						system("pause");
+						break;
+					}
+
+					case EXPLORE_KITCHEN_102: {
+						printf("주방에는 칼과 행주가 있고 불은 나오지 않는 것 같다. \n \n");
+
+						msg_int = 0;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						msg_int = 1;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						printf("칼, 마른행주 획득 \n");
+						system("pause");
+						if (msg_int != 1) {
+							msg_int = 2;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							msg_int = 100050;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+							msg_int = 100060;
+							send(sock, &msg_int, sizeof(msg_int), 0);
+						}
+						break;
+					}
+
+					case BACKSTAGE_102: {
+						int msg_int = 6;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+						return 0;
+					}
+
+					case MENU_102: {
+						msg_int = 1;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						exit = Menu_Game();
+						if (exit == -1) {
+							return -1;
+						}
+						break;
+					}
+					}
+				}
+				}
+			}
+		}
 		break;
 	}
 
 	case STAGE3: {
-		break;
+		system("cls");
+		printf("성공");
+		system("pause");
+
+		int msg_int = 6;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+		return 0;
 	}
 
 	case STAGE4: {

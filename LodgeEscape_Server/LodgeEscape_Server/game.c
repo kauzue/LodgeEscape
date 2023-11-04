@@ -9,12 +9,12 @@ enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
 enum Start_Game { CREATE_ROOM_START_GAME, FIND_ROOM_START_GAME, EXIT_START_GAME };
 enum Option { LOGIN_DATA_OPTION, LOGOUT_OPTION, EXIT_OPTION };
-enum Story { ITEM, MENU, CHAPTER, STAGE, ENDING, ACT };
+enum Story { ITEM, MENU, CHAPTER, STAGEUP, ENDING, ACT, STAGEDOWN, CHECK_ITEM, ITEMUP, ITEMDOWN };
 enum Act { WATER, BOOK };
 enum Menu { ITEM_MENU, SAVE_MENU, BACK_MENU, EXIT_MENU };
 enum Item {
 	FLASH = 10, FLASH_BATTERY = 11, FLASH_LIGHT = 12, WALLET_1 = 20, NOTE_1 = 50, WALLET_2 = 100010,
-	NOTE_2 = 100040
+	NOTE_2 = 100040, KNIFE = 100050, DRY_DISHCLOTH = 100060, WET_DISHCLOTH = 100061
 };
 
 void Sign_Up();
@@ -505,7 +505,7 @@ void InitStory()
 
 int Story()
 {
-	int msg_int, player_num;
+	int msg_int, player_num, room_num, item;
 
 	while (true) {
 		recv(sock, &msg_int, sizeof(msg_int), 0);
@@ -541,13 +541,27 @@ int Story()
 
 		case CHAPTER: {
 			recv(sock, &player_num, sizeof(player_num), 0);
+			recv(sock, &room_num, sizeof(room_num), 0);
 			s_saves[player_num][1].stage = 0;
 			s_saves[player_num][1].chapter++;
+			while (true) {
+				if (player_num == s_rooms[room_num].player1) {
+					if (s_saves[s_rooms[room_num].player2][1].chapter == s_saves[player_num][1].chapter) {
+						break;
+					}
+				}
+
+				else {
+					if (s_saves[s_rooms[room_num].player1][1].chapter == s_saves[player_num][1].chapter) {
+						break;
+					}
+				}
+			}
 
 			return 0;
 		}
 
-		case STAGE: {
+		case STAGEUP: {
 			recv(sock, &player_num, sizeof(player_num), 0);
 			s_saves[player_num][1].stage++;
 			
@@ -564,16 +578,16 @@ int Story()
 			switch (msg_int) {
 			case WATER: {
 				recv(sock, &msg_int, sizeof(msg_int), 0);
-				recv(sock, &player_num, sizeof(player_num), 0);
+				recv(sock, &room_num, sizeof(room_num), 0);
 
 				switch (msg_int) {
 				case 0: {
-					send(sock, &s_players[player_num].water_num, sizeof(int), 0);
+					send(sock, &s_rooms[room_num].water_num, sizeof(int), 0);
 					break;
 				}
 
 				case 1: {
-					s_players[player_num].water_num++;
+					s_rooms[room_num].water_num++;
 					break;
 				}
 				}
@@ -582,20 +596,69 @@ int Story()
 
 			case BOOK: {
 				recv(sock, &msg_int, sizeof(msg_int), 0);
-				recv(sock, &player_num, sizeof(player_num), 0);
+				recv(sock, &room_num, sizeof(room_num), 0);
 
 				switch (msg_int) {
 				case 0: {
-					send(sock, &s_players[player_num].book_num, sizeof(int), 0);
+					send(sock, &s_rooms[room_num].book_num, sizeof(int), 0);
 					break;
 				}
 
 				case 1: {
-					s_players[player_num].book_num++;
+					s_rooms[room_num].book_num;
 					break;
 				}
 				}
 			}
+			}
+		}
+
+		case STAGEDOWN: {
+			recv(sock, &player_num, sizeof(player_num), 0);
+			s_saves[player_num][1].stage--;
+
+			return 0;
+		}
+
+		case CHECK_ITEM: {
+			msg_int = 0;
+			recv(sock, &player_num, sizeof(player_num), 0);
+			recv(sock, &item, sizeof(item), 0);
+
+			for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
+				if (item == s_saves[player_num][1].items[i].number) {
+					msg_int = 1;
+					break;
+				}
+			}
+
+			send(sock, &msg_int, sizeof(msg_int), 0);
+			break;
+		}
+
+		case ITEMUP: {
+			recv(sock, &player_num, sizeof(player_num), 0);
+			recv(sock, &item, sizeof(item), 0);
+
+			for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
+				if (item == s_saves[player_num][1].items[i].number) {
+					s_saves[player_num][1].items[i].number++;
+					break;
+				}
+			}
+
+			break;
+		}
+
+		case ITEMDOWN: {
+			recv(sock, &player_num, sizeof(player_num), 0);
+			recv(sock, &item, sizeof(item), 0);
+
+			for (int i = 0; i < s_saves[player_num][1].item_num; i++) {
+				if (item == s_saves[player_num][1].items[i].number) {
+					s_saves[player_num][1].items[i].number--;
+					break;
+				}
 			}
 		}
 		}
@@ -714,6 +777,18 @@ EXIT_FOR:
 	}
 
 	case NOTE_2: {
+		break;
+	}
+
+	case KNIFE: {
+		break;
+	}
+
+	case DRY_DISHCLOTH: {
+		break;
+	}
+
+	case WET_DISHCLOTH: {
 		break;
 	}
 
