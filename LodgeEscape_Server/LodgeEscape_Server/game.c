@@ -9,7 +9,7 @@ enum Login { SIGN_UP_LOGIN, LOGIN_LOGIN, EXIT_LOGIN };
 enum Main_Menu { START_GAME_MAIN_MENU, LOAD_GAME_MAIN_MENU, OPTION_MAIN_MENU, ENDING_MAIN_MENU, EXIT_MAIN_MENU };
 enum Start_Game { CREATE_ROOM_START_GAME, FIND_ROOM_START_GAME, EXIT_START_GAME };
 enum Option { LOGIN_DATA_OPTION, LOGOUT_OPTION, EXIT_OPTION };
-enum Story { ITEM, MENU, CHAPTER, STAGEUP, ENDING, ACT, STAGEDOWN, CHECK_ITEM, ITEMUP, ITEMDOWN };
+enum Story { ITEM, MENU, CHAPTER, STAGEUP, ENDING, ACT, STAGEDOWN, CHECK_ITEM, ITEMUP, ITEMDOWN, INTERPHONE };
 enum Act { WATER, BOOK };
 enum Menu { ITEM_MENU, SAVE_MENU, BACK_MENU, EXIT_MENU };
 enum Item {
@@ -317,6 +317,9 @@ void Start_Game()
 			room.sock_server2 = sock;
 			room.sock_client2 = room.sock_client1;
 			room.exit_num = 0;
+			room.book_num = 0;
+			room.water_num = 0;
+			room.interphone_num = 0;
 			memcpy(&s_rooms[g_rooms_num], &room, sizeof(room_t));
 			++g_rooms_num;
 
@@ -605,12 +608,14 @@ int Story()
 				}
 
 				case 1: {
-					s_rooms[room_num].book_num;
+					s_rooms[room_num].book_num++;
 					break;
 				}
 				}
+				break;
 			}
 			}
+			break;
 		}
 
 		case STAGEDOWN: {
@@ -660,6 +665,39 @@ int Story()
 					break;
 				}
 			}
+			break;
+		}
+
+		case INTERPHONE: {
+			int num_player;
+			char msg_char[MAX_MSG_LEN] = "";
+
+			recv(sock, &room_num, sizeof(room_num), 0);
+			s_rooms[room_num].interphone_num++;
+			while (true) {
+				if (s_rooms[room_num].interphone_num == 2) {
+					msg_int = 1;
+					send(sock, &msg_int, sizeof(msg_int), 0);
+					recv(sock, &player_num, sizeof(player_num), 0);
+					num_player = s_players[player_num].player_num;
+
+					recv(sock, msg_char, MAX_MSG_LEN, 0);
+					if (strcmp(msg_char, "back") == 0) {
+						s_rooms[room_num].interphone_num--;
+						goto END_INTERPHONE;
+					}
+
+					else if (num_player == 0) {
+						send(s_rooms[room_num].sock_server2, msg_char, MAX_MSG_LEN, 0);
+					}
+
+					else {
+						send(s_rooms[room_num].sock_server1, msg_char, MAX_MSG_LEN, 0);
+					}
+				}
+			}
+END_INTERPHONE:
+			break;
 		}
 		}
 	}

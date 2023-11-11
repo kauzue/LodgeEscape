@@ -48,6 +48,7 @@ typedef struct room {
 	int exit_num;
 	int water_num;
 	int book_num;
+	int interphone_num;
 	SOCKET sock_server1;
 	SOCKET sock_server2;
 	SOCKET sock_client1;
