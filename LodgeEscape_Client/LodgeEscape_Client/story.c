@@ -11,6 +11,7 @@ int g_save_num;
 int g_item_num;
 int g_room_num;
 int end = 0;
+int chat = 1;
 
 enum Chapter { CHAPTER0, CHAPTER1, CHAPTER2, CHAPTER3, CHAPTER4 };
 enum Stage { STAGE1, STAGE2, STAGE3, STAGE4 };
@@ -429,6 +430,8 @@ void InterPhone()
 	int back = 0;
 	char msg_char[MAX_MSG_LEN] = "";
 
+	chat = 1;
+
 	msg_int = 10;
 	send(sock, &msg_int, sizeof(msg_int), 0);
 	send(sock, &g_room_num, sizeof(g_room_num), 0);
@@ -444,9 +447,11 @@ void InterPhone()
 		scanf_s("%s", msg_char, MAX_MSG_LEN);
 		send(sock, msg_char, MAX_MSG_LEN, 0);
 		if (strcmp(msg_char, "back") == 0) {
+			chat = 0;
 			break;
 		}
 	}
+	
 }
 
 void Recv()
@@ -454,15 +459,24 @@ void Recv()
 	char msg_char[MAX_MSG_LEN] = "";
 
 	while (true) {
-		recv(communication.sock, &msg_char, MAX_MSG_LEN, 0);
+		if (recv(sock, &msg_char, MAX_MSG_LEN, 0) >= 0) {
+			if (strcmp(msg_char, "end") == 0) {
+				break;
+			}
 
-		printf("\n받은 메시지 : %s \n전송 할 메시지 : ", msg_char);
-		if (strcmp(msg_char, "back") == 0) {
-			break;
+			printf("\n");
+
+			if (strcmp(msg_char, "back") == 0) {
+				printf("상대가 통신을 종료했습니다. \n");
+			}
+
+			else {
+				printf("받은 메시지 : %s \n전송 할 메시지 : ", msg_char);
+			}
 		}
 	}
 
-	exit(0);
+	_endthread();
 }
 
 void Exit_Game()
@@ -822,17 +836,29 @@ int Player0_Chapter0(int stage)
 					}
 
 					case NEXTCHAPTER_003: {
+						msg_int = 2;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						send(sock, &g_room_num, sizeof(g_room_num), 0);
 
-						break;
+						return 0;
 					}
 
 					case BACKSTAGE_003: {
+						int msg_int = 6;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
 
-						break;
+						return 0;
 					}
 
 					case MENU_003: {
-
+						msg_int = 1;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						exit = Menu_Game();
+						if (exit == -1) {
+							return -1;
+						}
 						break;
 					}
 					}
@@ -852,6 +878,9 @@ int Player0_Chapter0(int stage)
 
 int Player0_Chapter1(int stage)
 {
+	printf("성공");
+	system("pause");
+
 	return 0;
 }
 
@@ -1453,17 +1482,29 @@ int Player1_Chapter0(int stage)
 					}
 
 					case NEXTCHAPTER_003: {
-
-						break;
+						int msg_int = 2;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
+						send(sock, &g_room_num, sizeof(g_room_num), 0);
+						
+						return 0;
 					}
 
 					case BACKSTAGE_003: {
+						int msg_int = 6;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						send(sock, &g_player_num, sizeof(g_player_num), 0);
 
-						break;
+						return 0;
 					}
 
 					case MENU_003: {
-
+						msg_int = 1;
+						send(sock, &msg_int, sizeof(msg_int), 0);
+						exit = Menu_Game();
+						if (exit == -1) {
+							return -1;
+						}
 						break;
 					}
 					}
@@ -1482,5 +1523,8 @@ int Player1_Chapter0(int stage)
 
 int Player1_Chapter1(int stage)
 {
+	printf("성공");
+	system("pause");
+
 	return 0;
 }

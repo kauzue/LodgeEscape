@@ -681,18 +681,23 @@ int Story()
 					recv(sock, &player_num, sizeof(player_num), 0);
 					num_player = s_players[player_num].player_num;
 
-					recv(sock, msg_char, MAX_MSG_LEN, 0);
-					if (strcmp(msg_char, "back") == 0) {
-						s_rooms[room_num].interphone_num--;
-						goto END_INTERPHONE;
-					}
+					while (true) {
+						recv(sock, msg_char, MAX_MSG_LEN, 0);
 
-					else if (num_player == 0) {
-						send(s_rooms[room_num].sock_server2, msg_char, MAX_MSG_LEN, 0);
-					}
+						if (num_player == 0) {
+							send(s_rooms[room_num].sock_server2, msg_char, MAX_MSG_LEN, 0);
+						}
 
-					else {
-						send(s_rooms[room_num].sock_server1, msg_char, MAX_MSG_LEN, 0);
+						else {
+							send(s_rooms[room_num].sock_server1, msg_char, MAX_MSG_LEN, 0);
+						}
+
+						if (strcmp(msg_char, "back") == 0) {
+							strcpy(msg_char, "end");
+							send(sock, msg_char, MAX_MSG_LEN, 0);
+							s_rooms[room_num].interphone_num--;
+							goto END_INTERPHONE;
+						}
 					}
 				}
 			}
