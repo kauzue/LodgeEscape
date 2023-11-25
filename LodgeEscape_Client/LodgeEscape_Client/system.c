@@ -40,7 +40,7 @@ bool InitGame()
         s_items[int_temporary].number = int_temporary;
         fscanf_s(it, "%[^,],%[^,],%s", s_items[int_temporary].name, MAX_MSG_LEN, s_items[int_temporary].explaination, MAX_MSG_LEN, bool_temporary, MAX_MSG_LEN);
         if (strcmp(bool_temporary, "TRUE") == 0) {
-            s_items[int_temporary].use = bool_temporary;
+            s_items[int_temporary].use = true;
         }
     }
 
@@ -63,6 +63,8 @@ bool InitGame()
 
 ERR_FILE_CT:
     fclose(it);
+
+ERR_FILE_:
     return false;
 }
 

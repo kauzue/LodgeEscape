@@ -414,6 +414,7 @@ void Start_Game()
 
 					while (true) {
 						if (recv(sock, &communication.sock, sizeof(SOCKET), 0) >= 0) {
+							communication.interact = 0;
 							break;
 						}
 
@@ -456,6 +457,7 @@ void Start_Game()
 						else if (choice_room >= 0 && choice_room < msg_int) {
 							send(sock, &choice_room, sizeof(choice_room), 0);
 							send(sock, &g_player_num, sizeof(g_player_num), 0);
+							send(sock, &g_player_num, sizeof(g_player_num), 0);
 
 							printf("password : ");
 							scanf_s("%s", password, MAX_MSG_LEN);
@@ -473,6 +475,7 @@ void Start_Game()
 							else if (msg_int >= 0) {
 								send(sock, &sock, sizeof(SOCKET), 0);
 								recv(sock, &communication.sock, sizeof(SOCKET), 0);
+								communication.interact = 0;
 								send(sock, &g_save_num, sizeof(g_save_num), 0);
 								recv(sock, &msg_int, sizeof(msg_int), 0);
 								if (msg_int == 0) {

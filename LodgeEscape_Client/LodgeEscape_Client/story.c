@@ -426,6 +426,9 @@ void Item()
 
 void InterPhone()
 {
+	system("cls");
+	printf("다른 플레이어를 기다리고 있습니다.");
+
 	int msg_int;
 	int back = 0;
 	char msg_char[MAX_MSG_LEN] = "";
@@ -436,7 +439,15 @@ void InterPhone()
 	send(sock, &msg_int, sizeof(msg_int), 0);
 	send(sock, &g_room_num, sizeof(g_room_num), 0);
 	recv(sock, &msg_int, sizeof(msg_int), 0);
+	if (msg_int == 1) {
+		printf("다른 플레이어가 종료하고 있습니다. \n");
+		system("pause");
+		return;
+	}
+	recv(sock, &msg_int, sizeof(msg_int), 0);
 	send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+	communication.interact = 1;
 
 	system("cls");
 
@@ -468,6 +479,7 @@ void Recv()
 
 			if (strcmp(msg_char, "back") == 0) {
 				printf("상대가 통신을 종료했습니다. \n");
+				communication.interact = 0;
 			}
 
 			else {
@@ -481,10 +493,23 @@ void Recv()
 
 void Exit_Game()
 {
-	system("cls");
+	char msg_char[MAX_MSG_LEN] = "";
 	int msg_int;
+	system("cls");
 	printf("다른 플레이어 기다리는 중");
+	while (true) {
+		if (communication.interact == 0) {
+			break;
+		}
 
+		recv(sock, msg_char, MAX_MSG_LEN, 0);
+
+		if (strcmp(msg_char, "back") == 0) {
+			communication.interact = 0;
+			break;
+		}
+
+	}
 	send(sock, &g_room_num, sizeof(g_room_num), 0);
 	recv(sock, &msg_int, sizeof(msg_int), 0);
 	getc(stdin);

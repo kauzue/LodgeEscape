@@ -297,29 +297,55 @@ void Start_Game()
 		case CREATE_ROOM_START_GAME: {
 			room_t room;
 
+			int player_num;
+
 			recv(sock, room.r_name, MAX_MSG_LEN, 0);
 			if (strcmp(room.r_name, "0") == 0) {
 				return;
 			}
 			recv(sock, room.r_password, MAX_MSG_LEN, 0);
-			recv(sock, &room.player1, sizeof(room.player1), 0);
-			if (room.player1 == -1) {
+			recv(sock, &player_num, sizeof(player_num), 0);
+			if (s_players[player_num].player_num == 0) {
+				room.player1 = player_num;
+				room.player2 = -1;
+			}
+
+			else {
+				room.player2 = player_num;
+				room.player1 = -1;
+			}
+
+			if (player_num == -1) {
 				goto EXIT_CREATE_ROOM;
 			}
-			recv(sock, &room.sock_client1, sizeof(SOCKET), 0);
+			if (s_players[player_num].player_num == 0) {
+				recv(sock, &room.sock_client1, sizeof(SOCKET), 0);
+				room.sock_client2 = room.sock_client1;
+			}
+
+			else {
+				recv(sock, &room.sock_client2, sizeof(SOCKET), 0);
+				room.sock_client1 = room.sock_client2;
+			}
 			send(sock, &g_rooms_num, sizeof(g_rooms_num), 0);
 
 			recv(sock, &msg_int, sizeof(msg_int), 0);
-			room.player1_chapter = s_saves[room.player1][msg_int].chapter;
-			room.player2_chapter = s_saves[room.player1][msg_int].chapter;
-			room.player2 = -1;
+			if (s_players[player_num].player_num == 0) {
+				room.player1_chapter = s_saves[room.player1][msg_int].chapter;
+				room.player2_chapter = s_saves[room.player1][msg_int].chapter;
+			}
+
+			else {
+				room.player1_chapter = s_saves[room.player2][msg_int].chapter;
+				room.player2_chapter = s_saves[room.player2][msg_int].chapter;
+			}
 			room.sock_server1 = sock;
 			room.sock_server2 = sock;
-			room.sock_client2 = room.sock_client1;
 			room.exit_num = 0;
 			room.book_num = 0;
 			room.water_num = 0;
 			room.interphone_num = 0;
+			room.create_player = s_players[player_num].player_num;
 			memcpy(&s_rooms[g_rooms_num], &room, sizeof(room_t));
 			++g_rooms_num;
 
@@ -333,6 +359,7 @@ EXIT_CREATE_ROOM:
 
 		case FIND_ROOM_START_GAME: {
 			int room_num;
+			int player_num;
 			char password[MAX_MSG_LEN];
 			
 			while(true) {
@@ -352,7 +379,14 @@ EXIT_CREATE_ROOM:
 				else if (room_num == -2) {
 					continue;
 				}
-				recv(sock, &s_rooms[room_num].player2, sizeof(s_rooms[room_num].player2), 0);
+				recv(sock, &player_num, sizeof(player_num), 0);
+				if (s_players[player_num].player_num == 0) {
+					recv(sock, &s_rooms[room_num].player1, sizeof(s_rooms[room_num].player1), 0);
+				}
+
+				else {
+					recv(sock, &s_rooms[room_num].player2, sizeof(s_rooms[room_num].player2), 0);
+				}
 
 				recv(sock, password, MAX_MSG_LEN, 0);
 				if (strcmp(s_rooms[room_num].r_password, password) == 0) {
@@ -364,12 +398,23 @@ EXIT_CREATE_ROOM:
 						return;
 					}
 
-					recv(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
-					send(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
-					recv(sock, &msg_int, sizeof(msg_int), 0);
-					s_rooms[room_num].player2_chapter = s_saves[s_rooms[room_num].player2][msg_int].chapter;
-					s_rooms[room_num].sock_server2 = sock;
-					break;
+					if (s_players[player_num].player_num == 0) {
+						recv(sock, &s_rooms[room_num].sock_client1, sizeof(SOCKET), 0);
+						send(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						s_rooms[room_num].player1_chapter = s_saves[s_rooms[room_num].player1][msg_int].chapter;
+						s_rooms[room_num].sock_server1 = sock;
+						break;
+					}
+
+					else {
+						recv(sock, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+						send(sock, &s_rooms[room_num].sock_client1, sizeof(SOCKET), 0);
+						recv(sock, &msg_int, sizeof(msg_int), 0);
+						s_rooms[room_num].player2_chapter = s_saves[s_rooms[room_num].player2][msg_int].chapter;
+						s_rooms[room_num].sock_server2 = sock;
+						break;
+					}
 				}
 			}
 			
@@ -417,14 +462,27 @@ void Wait(int room_num)
 {
 	int msg_int = 0;
 
+
 	if (s_rooms[room_num].player1_chapter != s_rooms[room_num].player2_chapter) {
-		send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		if (s_rooms[room_num].create_player = 0) {
+			send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		}
+
+		else {
+			send(s_rooms[room_num].sock_server1, &msg_int, sizeof(msg_int), 0);
+		}
 		return;
 	}
 
 	else if(s_rooms[room_num].sock_server1 != s_rooms[room_num].sock_server2) {
 		msg_int = 1;
-		send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		if (s_rooms[room_num].create_player == 0) {
+			send(s_rooms[room_num].sock_server2, &msg_int, sizeof(msg_int), 0);
+		}
+
+		else {
+			send(s_rooms[room_num].sock_server1, &msg_int, sizeof(msg_int), 0);
+		}
 		g_rooms_num--;
 		InitStory();
 		return;
@@ -436,7 +494,13 @@ void Wait(int room_num)
 		}
 	}
 
-	send(s_rooms[room_num].sock_server1, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+	if (s_rooms[room_num].create_player == 0) {
+		send(s_rooms[room_num].sock_server1, &s_rooms[room_num].sock_client2, sizeof(SOCKET), 0);
+	}
+
+	else {
+		send(s_rooms[room_num].sock_server2, &s_rooms[room_num].sock_client1, sizeof(SOCKET), 0);
+	}
 	InitStory();
 }
 
@@ -673,6 +737,10 @@ int Story()
 			char msg_char[MAX_MSG_LEN] = "";
 
 			recv(sock, &room_num, sizeof(room_num), 0);
+			send(sock, &s_rooms[room_num].exit_num, sizeof(s_rooms[room_num].exit_num), 0);
+			if (s_rooms[room_num].exit_num == 1) {
+				goto END_INTERPHONE;
+			}
 			s_rooms[room_num].interphone_num++;
 			while (true) {
 				if (s_rooms[room_num].interphone_num == 2) {
