@@ -136,7 +136,7 @@ void Sign_Up()
 		fclose(sb);
 	}
 
-while (true) {
+	while (true) {
 		recv(sock, msg_char, MAX_MSG_LEN, 0);
 		if (strcmp(msg_char, "0") == 0) {
 			msg_int = -1;
@@ -961,6 +961,4 @@ void Save()
 	for (int i = 0; i < NUM_MAX_STORY; i++) {
 		s_saves[player_num][save_num].storys[i].num_clue = s_saves[player_num][1].storys[i].num_clue;
 	}
-
-	return;
 }

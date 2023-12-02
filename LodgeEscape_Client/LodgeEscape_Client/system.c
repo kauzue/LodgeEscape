@@ -8,6 +8,8 @@
 bool InitSystem()
 {
     system("mode con cols=80 lines=25 | title LodgeEscape");
+
+    return true;
 }
 
 bool InitGame()
@@ -21,7 +23,7 @@ bool InitGame()
     if (it == NULL) {
         puts("아이템 파일 오픈 실패");
         system("pause");
-        return false;
+        goto ERR_FILE_IT;
     }
 
     if (ct == NULL) {
@@ -64,7 +66,7 @@ bool InitGame()
 ERR_FILE_CT:
     fclose(it);
 
-ERR_FILE_:
+ERR_FILE_IT:
     return false;
 }
 

@@ -43,19 +43,22 @@ void Player0();
 void Player1();
 int Menu_Game();
 void Item();
+void Save();
 void InterPhone();
 void Recv();
 void Exit_Game();
 int Player0_Chapter0(int);
+void Explore_Room_1_002();
+void Explore_Room_3_002();
 int Player0_Chapter1(int);
+void Explore_Room_1_102();
+void Explore_Bookshelf_102();
 int Player1_Chapter0(int);
 int Player1_Chapter1(int);
 
 void InitStory(SOCKET socket, int player_num, int save_num, int room_num)
 {
-	int exit;
-	int player_number;
-	int msg_int;
+	int player_number = 0;
 
 	sock = socket;
 	g_player_num = player_num;
@@ -81,7 +84,7 @@ void Player0()
 {
 	int exit = 0;
 	int chapter_number;
-	int stage_number;
+	int stage_number = 0;
 
 	while (true) {
 		recv(sock, &chapter_number, sizeof(chapter_number), 0);
@@ -130,7 +133,7 @@ void Player1()
 {
 	int exit = 0;
 	int chapter_number;
-	int stage_number;
+	int stage_number = 0;
 
 	while (true) {
 		recv(sock, &chapter_number, sizeof(chapter_number), 0);
@@ -238,53 +241,7 @@ int Menu_Game()
 				}
 
 				case SAVE: {
-					int chapter, stage, item, clue;
-					int i = 2;
-
-					send(sock, &g_player_num, sizeof(g_player_num), 0);
-
-					while (true) {
-						system("cls");
-
-						recv(sock, &msg_int, sizeof(msg_int), 0);
-						for (i; i < msg_int; i++) {
-							recv(sock, &chapter, sizeof(chapter), 0);
-							recv(sock, &stage, sizeof(stage), 0);
-							recv(sock, &item, sizeof(item), 0);
-							recv(sock, &clue, sizeof(clue), 0);
-							printf("%d. %d챕터 %d스테이지 \n아이템 : %d개 \n단서 : %d개 \n \n", i + 1, chapter, stage, item, clue);
-						}
-
-						printf("페이지 (1 ~ 5) : ");
-						scanf_s("%d", &msg_int);
-						i = 4 * (msg_int - 1);
-						if (msg_int == 1) {
-							i = 2;
-						}
-						else if (msg_int < 1 || msg_int > 5) {
-							msg_int = 0;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							break;
-						}
-						send(sock, &msg_int, sizeof(msg_int), 0);
-					}
-
-					printf("선택 : ");
-					scanf_s("%d", &msg_int);
-					if (msg_int >= 3 && msg_int <= 20) {
-						msg_int--;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-					}
-
-					else {
-						system("cls");
-						printf("이 저장장치는 선택할 수 없습니다.");
-
-						msg_int = 0;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						break;
-					}
-
+					Save();
 					break;
 				}
 
@@ -422,6 +379,57 @@ void Item()
 		break;
 	}
 	}
+}
+
+void Save()
+{
+	int chapter, stage, item, clue, msg_int;
+	int i = 2;
+
+	send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+	while (true) {
+		system("cls");
+
+		recv(sock, &msg_int, sizeof(msg_int), 0);
+		for (; i < msg_int; i++) {
+			recv(sock, &chapter, sizeof(chapter), 0);
+			recv(sock, &stage, sizeof(stage), 0);
+			recv(sock, &item, sizeof(item), 0);
+			recv(sock, &clue, sizeof(clue), 0);
+			printf("%d. %d챕터 %d스테이지 \n아이템 : %d개 \n단서 : %d개 \n \n", i + 1, chapter, stage, item, clue);
+		}
+
+		printf("페이지 (1 ~ 5) : ");
+		scanf_s("%d", &msg_int);
+		i = 4 * (msg_int - 1);
+		if (msg_int == 1) {
+			i = 2;
+		}
+		else if (msg_int < 1 || msg_int > 5) {
+			msg_int = 0;
+			send(sock, &msg_int, sizeof(msg_int), 0);
+			break;
+		}
+		send(sock, &msg_int, sizeof(msg_int), 0);
+	}
+
+	printf("선택 : ");
+	scanf_s("%d", &msg_int);
+	if (msg_int >= 3 && msg_int <= 20) {
+		msg_int--;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+	}
+
+	else {
+		system("cls");
+		printf("이 저장장치는 선택할 수 없습니다.");
+
+		msg_int = 0;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+	}
+
+	return;
 }
 
 void InterPhone()
@@ -693,42 +701,7 @@ int Player0_Chapter0(int stage)
 
 					switch (y) {
 					case EXPLORE_ROOM_1_002: {
-						msg_int = 5;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						msg_int = 0;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						send(sock, &g_room_num, sizeof(g_room_num), 0);
-						recv(sock, &msg_int, sizeof(msg_int), 0);
-						if (msg_int >= 1) {
-							msg_int = 7;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							send(sock, &g_player_num, sizeof(g_player_num), 0);
-							msg_int = 60;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							recv(sock, &msg_int, sizeof(msg_int), 0);
-							if (msg_int != 1) {
-								printf("방 열쇠를 얻었다. \n");
-
-								msg_int = 0;
-								send(sock, &msg_int, sizeof(msg_int), 0);
-								send(sock, &g_player_num, sizeof(g_player_num), 0);
-								msg_int = 1;
-								send(sock, &msg_int, sizeof(msg_int), 0);
-								recv(sock, &msg_int, sizeof(msg_int), 0);
-								printf("방 열쇠 획득 \n");
-								system("pause");
-								system("cls");
-								if (msg_int != 1) {
-									msg_int = 1;
-									send(sock, &msg_int, sizeof(msg_int), 0);
-									msg_int = 60;
-									send(sock, &msg_int, sizeof(msg_int), 0);
-								}
-							}
-						}
-						printf("화장실이다. 물은 나오지 않는 것 같다. \n");
-						system("pause");
+						Explore_Room_1_002();
 						break;
 					}
 
@@ -739,30 +712,7 @@ int Player0_Chapter0(int stage)
 					}
 
 					case EXPLORE_ROOM_3_002: {
-						msg_int = 7;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						send(sock, &g_player_num, sizeof(g_player_num), 0);
-						msg_int = 60;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						recv(sock, &msg_int, sizeof(msg_int), 0);
-						if (msg_int == 1) {
-							printf("현재 가진 열쇠로 문을 열 수 있을 것 같다. \n \n");
-							printf("문을 열고 들어가시겠습니까? (1/0) \n");
-							scanf_s("%d", &msg_int);
-							if (msg_int == 1) {
-								int msg_int = 3;
-								send(sock, &msg_int, sizeof(msg_int), 0);
-								send(sock, &g_player_num, sizeof(g_player_num), 0);
-
-								return 0;
-							}
-						}
-
-						else {
-							printf("문이 잠겨있습니다. \n \n");
-							system("pause");
-						}
-
+						Explore_Room_3_002();
 						break;
 					}
 
@@ -898,6 +848,79 @@ int Player0_Chapter0(int stage)
 
 		break;
 	}
+	}
+
+	return 0;
+}
+
+void Explore_Room_1_002()
+{
+	int msg_int;
+
+	msg_int = 5;
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	msg_int = 0;
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	send(sock, &g_room_num, sizeof(g_room_num), 0);
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+	if (msg_int >= 1) {
+		msg_int = 7;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &g_player_num, sizeof(g_player_num), 0);
+		msg_int = 60;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		recv(sock, &msg_int, sizeof(msg_int), 0);
+		if (msg_int != 1) {
+			printf("방 열쇠를 얻었다. \n");
+
+			msg_int = 0;
+			send(sock, &msg_int, sizeof(msg_int), 0);
+			send(sock, &g_player_num, sizeof(g_player_num), 0);
+			msg_int = 1;
+			send(sock, &msg_int, sizeof(msg_int), 0);
+			recv(sock, &msg_int, sizeof(msg_int), 0);
+			printf("방 열쇠 획득 \n");
+			system("pause");
+			system("cls");
+			if (msg_int != 1) {
+				msg_int = 1;
+				send(sock, &msg_int, sizeof(msg_int), 0);
+				msg_int = 60;
+				send(sock, &msg_int, sizeof(msg_int), 0);
+			}
+		}
+	}
+	printf("화장실이다. 물은 나오지 않는 것 같다. \n");
+	system("pause");
+}
+
+void Explore_Room_3_002()
+{
+	int msg_int;
+
+	msg_int = 7;
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	send(sock, &g_player_num, sizeof(g_player_num), 0);
+	msg_int = 60;
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+	if (msg_int == 1) {
+		printf("현재 가진 열쇠로 문을 열 수 있을 것 같다. \n \n");
+		printf("문을 열고 들어가시겠습니까? (1/0) \n");
+		scanf_s("%d", &msg_int);
+		if (msg_int == 1) {
+			int msg_int = 3;
+			send(sock, &msg_int, sizeof(msg_int), 0);
+			send(sock, &g_player_num, sizeof(g_player_num), 0);
+
+			return 0;
+		}
+	}
+
+	else {
+		printf("문이 잠겨있습니다. \n \n");
+		system("pause");
 	}
 }
 
@@ -1088,43 +1111,7 @@ int Player1_Chapter0(int stage)
 
 					switch (y) {
 					case EXPLORE_ROOM_1_102: {
-						printf("화장실이다. \n \n");
-						msg_int = 7;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						send(sock, &g_player_num, sizeof(g_player_num), 0);
-						msg_int = 100060;
-						send(sock, &msg_int, sizeof(msg_int), 0);
-						recv(sock, &msg_int, sizeof(msg_int), 0);
-						if (msg_int == 1) {
-							printf("마른 행주에 물을 묻혔다. \n");
-							system("pause");
-							msg_int = 8;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							send(sock, &g_player_num, sizeof(g_player_num), 0);
-							msg_int = 100060;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-						}
-
-						system("cls");
-						printf("화장실이다. \n \n");
-
-						printf("세면대의 물을 내릴 수 있을 것 같다. \n \n");
-
-						printf("세면대의 물을 내리시겠습니까? (1/0) \n");
-						scanf_s("%d", &choice);
-						if (choice == 1) {
-							msg_int = 5;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							msg_int = 0;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							send(sock, &choice, sizeof(choice), 0);
-							send(sock, &g_room_num, sizeof(g_room_num), 0);
-
-							system("cls");
-							printf("물을 내렸다. \n");
-							system("pause");
-						}
-
+						Explore_Room_1_102();
 						break;
 					}
 
@@ -1150,249 +1137,7 @@ int Player1_Chapter0(int stage)
 					}
 
 					case EXPLORE_BOOKSHELF_102: {
-						printf("책장이다. \n \n");
-						printf("책을 읽을 수 있을 것 같다. \n");
-						printf("책을 읽으시겠습니까? (1/0) \n");
-						scanf_s("%d", &choice);
-						if (choice == 1) {
-							msg_int = 5;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							msg_int = 1;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							msg_int = 0;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							send(sock, &g_room_num, sizeof(g_room_num), 0);
-							recv(sock, &msg_int, sizeof(msg_int), 0);
-
-							system("cls");
-
-							switch (msg_int) {
-							case BOOK0: {
-								printf("(책 이름) \n \n");
-								printf("(책 내용) \n");
-								system("pause");
-								break;
-							}
-
-							case BOOK1: {
-								system("pause");
-								break;
-							}
-
-							case BOOK2: {
-								system("pause");
-								break;
-							}
-
-							case BOOK3: {
-								system("pause");
-								break;
-							}
-
-							case BOOK4: {
-								system("pause");
-								break;
-							}
-
-							case BOOK5: {
-								system("pause");
-								break;
-							}
-
-							case BOOK6: {
-								system("pause");
-								break;
-							}
-
-							case BOOK7: {
-								system("pause");
-								break;
-							}
-
-							case BOOK8: {
-								system("pause");
-								break;
-							}
-
-							case BOOK9: {
-								system("pause");
-								break;
-							}
-
-							case BOOK10: {
-								system("pause");
-								break;
-							}
-
-							case BOOK11: {
-								system("pause");
-								break;
-							}
-
-							case BOOK12: {
-								system("pause");
-								break;
-							}
-
-							case BOOK13: {
-								system("pause");
-								break;
-							}
-
-							case BOOK14: {
-								system("pause");
-								break;
-							}
-
-							case BOOK15: {
-								system("pause");
-								break;
-							}
-
-							case BOOK16: {
-								system("pause");
-								break;
-							}
-
-							case BOOK17: {
-								system("pause");
-								break;
-							}
-
-							case BOOK18: {
-								system("pause");
-								break;
-							}
-
-							case BOOK19: {
-								system("pause");
-								break;
-							}
-
-							case BOOK20: {
-								system("pause");
-								break;
-							}
-
-							case BOOK21: {
-								system("pause");
-								break;
-							}
-
-							case BOOK22: {
-								system("pause");
-								break;
-							}
-
-							case BOOK23: {
-								system("pause");
-								break;
-							}
-
-							case BOOK24: {
-								system("pause");
-								break;
-							}
-
-							case BOOK25: {
-								system("pause");
-								break;
-							}
-
-							case BOOK26: {
-								system("pause");
-								break;
-							}
-
-							case BOOK27: {
-								system("pause");
-								break;
-							}
-
-							case BOOK28: {
-								system("pause");
-								break;
-							}
-
-							case BOOK29: {
-								system("pause");
-								break;
-							}
-
-							case BOOK30: {
-								system("pause");
-								break;
-							}
-
-							case BOOK31: {
-								system("pause");
-								break;
-							}
-
-							case BOOK32: {
-								system("pause");
-								break;
-							}
-
-							case BOOK33: {
-								system("pause");
-								break;
-							}
-
-							case BOOK34: {
-								system("pause");
-								break;
-							}
-
-							case BOOK35: {
-								system("pause");
-								break;
-							}
-
-							case BOOK36: {
-								system("pause");
-								break;
-							}
-
-							case BOOK37: {
-								system("pause");
-								break;
-							}
-
-							case BOOK38: {
-								system("pause");
-								break;
-							}
-
-							case BOOK39: {
-								system("pause");
-								break;
-							}
-
-							default: {
-								printf("모든 책을 읽은 것 같다. \n");
-								system("puase");
-								break;
-							}
-
-							}
-
-							if (msg_int >= 20) {
-								system("cls");
-								printf("철문이 보인다. \n");
-								printf("하지만 열 수 있는 방법은 보이지 않는다. \n");
-								system("pause");
-							}
-
-							msg_int = 5;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							msg_int = 1;
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							send(sock, &msg_int, sizeof(msg_int), 0);
-							send(sock, &g_room_num, sizeof(g_room_num), 0);
-
-
-						}
+						Explore_Bookshelf_102();
 						break;
 					}
 
@@ -1422,7 +1167,6 @@ int Player1_Chapter0(int stage)
 						int msg_int = 6;
 						send(sock, &msg_int, sizeof(msg_int), 0);
 						send(sock, &g_player_num, sizeof(g_player_num), 0);
-
 						return 0;
 					}
 
@@ -1544,6 +1288,301 @@ int Player1_Chapter0(int stage)
 		break;
 	}
 	}
+
+	return 0;
+}
+
+void Explore_Room_1_102()
+{
+	int msg_int, choice;
+
+	printf("화장실이다. \n \n");
+	msg_int = 7;
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	send(sock, &g_player_num, sizeof(g_player_num), 0);
+	msg_int = 100060;
+	send(sock, &msg_int, sizeof(msg_int), 0);
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+	if (msg_int == 1) {
+		printf("마른 행주에 물을 묻혔다. \n");
+		system("pause");
+		msg_int = 8;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &g_player_num, sizeof(g_player_num), 0);
+		msg_int = 100060;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+	}
+
+	system("cls");
+	printf("화장실이다. \n \n");
+
+	printf("세면대의 물을 내릴 수 있을 것 같다. \n \n");
+
+	printf("세면대의 물을 내리시겠습니까? (1/0) \n");
+	scanf_s("%d", &choice);
+	if (choice == 1) {
+		msg_int = 5;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		msg_int = 0;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &choice, sizeof(choice), 0);
+		send(sock, &g_room_num, sizeof(g_room_num), 0);
+
+		system("cls");
+		printf("물을 내렸다. \n");
+		system("pause");
+	}
+
+	return;
+}
+
+void Explore_Bookshelf_102()
+{
+	int msg_int, choice;
+
+	printf("책장이다. \n \n");
+	printf("책을 읽을 수 있을 것 같다. \n");
+	printf("책을 읽으시겠습니까? (1/0) \n");
+	scanf_s("%d", &choice);
+	if (choice == 1) {
+		msg_int = 5;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		msg_int = 1;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		msg_int = 0;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &g_room_num, sizeof(g_room_num), 0);
+		recv(sock, &msg_int, sizeof(msg_int), 0);
+
+		system("cls");
+
+		switch (msg_int) {
+		case BOOK0: {
+			printf("(책 이름) \n \n");
+			printf("(책 내용) \n");
+			system("pause");
+			break;
+		}
+
+		case BOOK1: {
+			system("pause");
+			break;
+		}
+
+		case BOOK2: {
+			system("pause");
+			break;
+		}
+
+		case BOOK3: {
+			system("pause");
+			break;
+		}
+
+		case BOOK4: {
+			system("pause");
+			break;
+		}
+
+		case BOOK5: {
+			system("pause");
+			break;
+		}
+
+		case BOOK6: {
+			system("pause");
+			break;
+		}
+
+		case BOOK7: {
+			system("pause");
+			break;
+		}
+
+		case BOOK8: {
+			system("pause");
+			break;
+		}
+
+		case BOOK9: {
+			system("pause");
+			break;
+		}
+
+		case BOOK10: {
+			system("pause");
+			break;
+		}
+
+		case BOOK11: {
+			system("pause");
+			break;
+		}
+
+		case BOOK12: {
+			system("pause");
+			break;
+		}
+
+		case BOOK13: {
+			system("pause");
+			break;
+		}
+
+		case BOOK14: {
+			system("pause");
+			break;
+		}
+
+		case BOOK15: {
+			system("pause");
+			break;
+		}
+
+		case BOOK16: {
+			system("pause");
+			break;
+		}
+
+		case BOOK17: {
+			system("pause");
+			break;
+		}
+
+		case BOOK18: {
+			system("pause");
+			break;
+		}
+
+		case BOOK19: {
+			system("pause");
+			break;
+		}
+
+		case BOOK20: {
+			system("pause");
+			break;
+		}
+
+		case BOOK21: {
+			system("pause");
+			break;
+		}
+
+		case BOOK22: {
+			system("pause");
+			break;
+		}
+
+		case BOOK23: {
+			system("pause");
+			break;
+		}
+
+		case BOOK24: {
+			system("pause");
+			break;
+		}
+
+		case BOOK25: {
+			system("pause");
+			break;
+		}
+
+		case BOOK26: {
+			system("pause");
+			break;
+		}
+
+		case BOOK27: {
+			system("pause");
+			break;
+		}
+
+		case BOOK28: {
+			system("pause");
+			break;
+		}
+
+		case BOOK29: {
+			system("pause");
+			break;
+		}
+
+		case BOOK30: {
+			system("pause");
+			break;
+		}
+
+		case BOOK31: {
+			system("pause");
+			break;
+		}
+
+		case BOOK32: {
+			system("pause");
+			break;
+		}
+
+		case BOOK33: {
+			system("pause");
+			break;
+		}
+
+		case BOOK34: {
+			system("pause");
+			break;
+		}
+
+		case BOOK35: {
+			system("pause");
+			break;
+		}
+
+		case BOOK36: {
+			system("pause");
+			break;
+		}
+
+		case BOOK37: {
+			system("pause");
+			break;
+		}
+
+		case BOOK38: {
+			system("pause");
+			break;
+		}
+
+		case BOOK39: {
+			system("pause");
+			break;
+		}
+
+		default: {
+			printf("모든 책을 읽은 것 같다. \n");
+			system("puase");
+			break;
+		}
+
+		}
+
+		if (msg_int >= 20) {
+			system("cls");
+			printf("철문이 보인다. \n");
+			printf("하지만 열 수 있는 방법은 보이지 않는다. \n");
+			system("pause");
+		}
+
+		msg_int = 5;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		msg_int = 1;
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &msg_int, sizeof(msg_int), 0);
+		send(sock, &g_room_num, sizeof(g_room_num), 0);
+	}
+
+	return;
 }
 
 int Player1_Chapter1(int stage)

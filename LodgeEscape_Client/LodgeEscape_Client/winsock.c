@@ -29,4 +29,6 @@ SOCKET StartWinsock()
     }
 
     Game_Login(sock);
+
+    return 0;
 }
